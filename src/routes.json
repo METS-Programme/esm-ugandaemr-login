@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.24.0"
+  },
+  "pages": [
+    {
+      "component": "root",
+      "route": "login",
+      "online": true,
+      "offline": true
+    },
+    {
+      "component": "root",
+      "route": "logout",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "extensions": [
+    {
+      "name": "logout-button",
+      "slot": "user-panel-actions-slot",
+      "component": "logoutButton",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "location-changer",
+      "slot": "user-panel-slot",
+      "component": "changeLocationLink",
+      "online": true,
+      "offline": true,
+      "order": 1
+    }
+  ]
+}
