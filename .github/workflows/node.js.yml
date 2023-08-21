@@ -1,10 +1,11 @@
 name: UgandaEMR CI
 
 on:
+  workflow_dispatch:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   release:
     types:
       - created
