@@ -79,6 +79,7 @@
     "jest": "^28.1.0",
     "jest-cli": "^29.6.2",
     "jest-environment-jsdom": "^29.6.2",
+    "lerna": "^7.1.5",
     "openmrs": "^5.1.0",
     "prettier": "^2.8.8",
     "react": "^18.1.0",
