@@ -18,7 +18,8 @@
     "typescript": "tsc",
     "lint": "TIMING=1 eslint src --ext ts,tsx",
     "extract-translations": "i18next 'src/**/*.component.tsx'",
-    "prettier": "prettier --write \"src/**/*.{ts,tsx}\""
+    "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "verify": "turbo lint typescript coverage"
   },
   "keywords": [
     "openmrs",
@@ -86,6 +87,8 @@
     "react-router-dom": "^6.3.0",
     "rxjs": "^6.5.3",
     "swr": "^2.0.1",
+    "turbo": "^1.10.12",
+    "typescript": "^5.1.6",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.4"
   }
