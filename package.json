@@ -19,7 +19,9 @@
     "lint": "TIMING=1 eslint src --ext ts,tsx",
     "extract-translations": "i18next 'src/**/*.component.tsx'",
     "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "verify": "turbo lint typescript coverage"
+    "verify": "turbo lint typescript coverage",
+    "ci:prepublish": "lerna publish from-package --no-git-reset --yes --dist-tag next",
+    "release": "lerna version --no-git-tag-version"
   },
   "keywords": [
     "openmrs",
