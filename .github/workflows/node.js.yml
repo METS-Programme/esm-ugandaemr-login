@@ -17,10 +17,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TURBO_API: 'http://127.0.0.1:9080'
-      TURBO_TOKEN: ${{ secrets.TURBO_SERVER_TOKEN }}
-      TURBO_TEAM: ${{ github.repository_owner }}
 
     steps:
       - uses: actions/checkout@v3
@@ -37,7 +33,8 @@ jobs:
           server-token: ${{ secrets.TURBO_SERVER_TOKEN }}
 
       - run: yarn verify
-      - run: yarn turbo build --color
+      - run: yarn turbo build --color --concurrency=5
+      
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -61,11 +58,10 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-          scope: "@ugandaemr"
       - run: yarn install --immutable
 
       - name: Version
-        run: yarn lerna version "$(node -e "console.log(require('semver').inc(require('./lerna.json').version, 'patch'))")-pre.${{ github.run_number }}" --no-git-tag-version --no-push --yes
+        run: yarn lerna version "$(node -e "console.log(require('semver').inc(require('./lerna.json').version, 'patch'))")-pre.${{ github.run_number }}"
 
       - name: Build
         run: yarn turbo build --color --concurrency=5
