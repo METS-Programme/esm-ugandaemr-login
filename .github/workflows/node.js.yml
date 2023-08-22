@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
       - run: yarn install --immutable
 
       - name: Setup local cache server for Turborepo
@@ -39,8 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: |
-            dist
+          path: dist
 
   pre_release:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -61,7 +61,7 @@ jobs:
       - run: yarn install --immutable
 
       - name: Version
-        run: yarn lerna version "$(node -e "console.log(require('semver').inc(require('./lerna.json').version, 'patch'))")-pre.${{ github.run_number }}"
+        run: yarn version "$(node -e "console.log(require('semver').inc(require('./package.json').version, 'patch'))")-pre.${{ github.run_number }}"
 
       - name: Build
         run: yarn turbo build --color --concurrency=5
@@ -78,8 +78,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: |
-            dist
+          path: dist
 
   release:
     runs-on: ubuntu-latest
