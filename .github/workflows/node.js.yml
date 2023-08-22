@@ -34,7 +34,7 @@ jobs:
 
       - run: yarn verify
       - run: yarn turbo build --color --concurrency=5
-      
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -70,7 +70,7 @@ jobs:
       - run: git add . && git commit -m "Prerelease version" --no-verify
 
       - name: Pre-release
-        run: yarn ci:prepublish
+        run: yarn config set npmAuthToken "${NODE_AUTH_TOKEN}" && yarn npm publish --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
