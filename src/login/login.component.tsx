@@ -241,8 +241,8 @@ const Login: React.FC<LoginReferrer> = () => {
         <div className={styles["footer"]}>
           <Tile className={styles["powered-by-card"]}>
             <div className={styles["powered-by-txt"]} style={{ flex: "auto" }}>
-              &copy;
-              {t("2023AllRightsReserved", "2023 All Rights Reserved")}
+              &copy; {new Date().getFullYear()}{" "}
+              {t("allRightsReserved", "All Rights Reserved")}
               <span className={styles["text-color-red"]}>
                 {" "}
                 {t(
