@@ -25,8 +25,18 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-      - run: yarn install --immutable
-
+          
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+            
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+      
       - name: Setup local cache server for Turborepo
         uses: felixmosh/turborepo-gh-artifacts@v2
         with:
@@ -58,7 +68,17 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-      - run: yarn install --immutable
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
 
       - name: Version
         run: yarn lerna version "$(node -e "console.log(require('semver').inc(require('./lerna.json').version, 'patch'))")-pre.${{ github.run_number }}"
@@ -66,7 +86,7 @@ jobs:
       - name: Build
         run: yarn turbo build --color --concurrency=5
 
-      - run: git config user.email "<>" && git config user.name "GitHub Actions Bot"
+      - run: git config user.email "<>" && git config user.name "UgandaEMR CI"
       - run: git add . && git commit -m "Prerelease version" --no-verify
 
       - name: Pre-release
