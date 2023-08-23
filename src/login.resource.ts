@@ -80,7 +80,7 @@ export async function performLogin(
     await logoutIfNoCredentials(sessionUrl, abortController);
   }
 
-  await setSessionLocation(locationAttr.uuid, new AbortController());
+  await setSessionLocation(locationAttr.value.uuid, new AbortController());
 }
 
 interface LoginLocationData {
