@@ -2,12 +2,10 @@
 
 .container {
   display: flex;
-  // flex-direction: column;
   justify-content: right;
   align-items: center;
   background-image: url("../assets/background.png");
-  background-size: 60%;
-  background-position: left;
+  background-size: contain;
   background-repeat: no-repeat;
 }
 
