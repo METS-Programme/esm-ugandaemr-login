@@ -21,8 +21,8 @@ import {
   useSession,
 } from "@openmrs/esm-framework";
 import { performLogin } from "../login.resource";
-import styles from "./login.scss";
 import Logo from "./logo.component";
+import styles from "./login.scss";
 
 export interface LoginReferrer {
   referrer?: string;

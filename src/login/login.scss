@@ -2,11 +2,25 @@
 
 .container {
   display: flex;
-  justify-content: right;
   align-items: center;
   background-image: url("../assets/background.png");
-  background-size: contain;
   background-repeat: no-repeat;
+  height: 100vh;
+  background-size: cover;
+  justify-content: center;
+}
+
+@media screen and (min-width: 1150px) {
+  .container {
+    max-width: 90%;
+    background-size: contain;
+    justify-content: right;
+  }
+  
+  .login-card {
+    margin-top: 2.5%;
+    border: none;
+  }
 }
 
 .center {
@@ -69,24 +83,6 @@
   flex-direction: column;
   align-items: center;
   border-radius: 0.5rem;
-}
-
-@media only screen and (min-width: 481px) {
-  .container {
-    height: 100vh;
-    max-width: 90%;
-  }
-}
-
-@media only screen and (max-width: 480px) {
-  .login-card {
-    margin-top: 2.5%;
-    border: none;
-  }
-
-  .container {
-    height: 100vh;
-  }
 }
 
 .input-group {
