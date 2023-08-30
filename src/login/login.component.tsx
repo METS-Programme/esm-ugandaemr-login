@@ -118,78 +118,104 @@ const Login: React.FC<LoginReferrer> = () => {
   if (config.provider.type === "basic") {
     return (
       <div className={`canvas ${styles["container"]}`}>
-        <Tile className={styles["login-card"]}>
-          <Logo className={styles.logo} />
-          {errorMessage && (
-            <InlineNotification
-              className={styles.errorMessage}
-              kind="error"
-              /**
-               * This comment tells i18n to still keep the following translation keys (used as value for: errorMessage):
-               * t('invalidCredentials')
-               */
-              subtitle={t(errorMessage)}
-              title={t("error", "Error")}
-              onClick={() => setErrorMessage("")}
-            />
-          )}
-          <form onSubmit={handleSubmit} ref={formRef}>
-            <div className={styles["input-group"]}>
-              <div className={styles["input-container"]}>
-                <TextInput
-                  id="username"
-                  type="text"
-                  name="username"
-                  labelText={t("username", "Username")}
-                  value={username}
-                  onChange={changeUsername}
-                  ref={usernameInputRef}
-                  autoFocus
-                  required
-                />
-              </div>
-              <div style={{ marginTop: "1rem" }} />
+        <div className={styles.section}>
+          <Tile className={styles["login-card"]}>
+            <Logo className={styles.logo} />
+            {errorMessage && (
+              <InlineNotification
+                className={styles.errorMessage}
+                kind="error"
+                /**
+                 * This comment tells i18n to still keep the following translation keys (used as value for: errorMessage):
+                 * t('invalidCredentials')
+                 */
+                subtitle={t(errorMessage)}
+                title={t("error", "Error")}
+                onClick={() => setErrorMessage("")}
+              />
+            )}
+            <form onSubmit={handleSubmit} ref={formRef}>
               <div className={styles["input-group"]}>
-                <PasswordInput
-                  id="password"
-                  invalidText={t(
-                    "validValueRequired",
-                    "A valid value is required"
-                  )}
-                  labelText={t("password", "Password")}
-                  name="password"
-                  value={password}
-                  onChange={changePassword}
-                  ref={passwordInputRef}
-                  required
-                  showPasswordLabel="Show password"
-                />
-              </div>
-
-              <div>
-                <div>
-                  <Button
-                    type="submit"
-                    className={styles.continueButton}
-                    renderIcon={(props) => <ArrowRight size={24} {...props} />}
-                    iconDescription="Log in"
-                    disabled={!isLoginEnabled || isLoggingIn}
-                  >
-                    {isLoggingIn ? (
-                      <InlineLoading
-                        className={styles.loader}
-                        description={t("loggingIn", "Logging in") + "..."}
-                      />
-                    ) : (
-                      <span>{t("login", "Log in")}</span>
+                <div className={styles["input-container"]}>
+                  <TextInput
+                    id="username"
+                    type="text"
+                    name="username"
+                    labelText={t("username", "Username")}
+                    value={username}
+                    onChange={changeUsername}
+                    ref={usernameInputRef}
+                    autoFocus
+                    required
+                  />
+                </div>
+                <div style={{ marginTop: "1rem" }} />
+                <div className={styles["input-group"]}>
+                  <PasswordInput
+                    id="password"
+                    invalidText={t(
+                      "validValueRequired",
+                      "A valid value is required"
                     )}
-                  </Button>
+                    labelText={t("password", "Password")}
+                    name="password"
+                    value={password}
+                    onChange={changePassword}
+                    ref={passwordInputRef}
+                    required
+                    showPasswordLabel="Show password"
+                  />
+                </div>
+
+                <div>
+                  <div>
+                    <Button
+                      type="submit"
+                      className={styles.continueButton}
+                      renderIcon={(props) => (
+                        <ArrowRight size={24} {...props} />
+                      )}
+                      iconDescription="Log in"
+                      disabled={!isLoginEnabled || isLoggingIn}
+                    >
+                      {isLoggingIn ? (
+                        <InlineLoading
+                          className={styles.loader}
+                          description={t("loggingIn", "Logging in") + "..."}
+                        />
+                      ) : (
+                        <span>{t("login", "Log in")}</span>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
+            </form>
+          </Tile>
+          <div className={styles.footer}>
+            <div className={styles.links}>
+              <span>© {new Date().getFullYear()} All rights reserved</span>
+              <span className={styles.link}>
+                <a href="http://www.health.go.ug/">
+                  Ministry of Health - Republic of Uganda
+                </a>
+              </span>
             </div>
-          </form>
-        </Tile>
-        <div className={styles["footer"]}></div>
+            <span className={styles.link}>
+              Need help? Contact us at{" "}
+              <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
+              support
+            </span>
+            <div className={styles.attribution}>
+              <span className={styles["powered-by-txt"]}>
+                {t("poweredBy", "Powered by")}
+              </span>
+              <svg role="img" className={styles["powered-by-logo"]}>
+                <use xlinkHref="#omrs-logo-partial-mono"></use>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
