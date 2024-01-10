@@ -53,7 +53,7 @@ export const configSchema = {
     loginSuccess: {
       _type: Type.String,
       _description: "Where to take the user after they are logged in.",
-      _default: "${openmrsSpaBase}/home",
+      _default: "${openmrsSpaBase}/home/patient-queues",
       _validators: [validators.isUrl],
     },
   },
