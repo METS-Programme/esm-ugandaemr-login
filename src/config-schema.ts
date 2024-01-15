@@ -60,7 +60,7 @@ export const configSchema = {
   logo: {
     src: {
       _type: Type.String,
-      _default: null,
+      _default: "${openmrsSpaBase}/home/patient-queues",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],
