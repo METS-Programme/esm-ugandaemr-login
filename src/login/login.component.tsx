@@ -206,7 +206,6 @@ const Login: React.FC<LoginReferrer> = () => {
               <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
               support
             </span>
-
           </div>
         </div>
       </div>
