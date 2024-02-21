@@ -5,6 +5,7 @@
 .container {
   display: flex;
   align-items: center;
+  background-image: url("../assets/background.png");
   background-repeat: no-repeat;
   height: 100vh;
   background-size: cover;
@@ -53,11 +54,11 @@
 
 @media screen and (min-width: 1150px) {
   .container {
-    max-width: 100%;
+    max-width: 90%;
     background-size: contain;
-    justify-content: center;
+    justify-content: right;
   }
-
+  
   .login-card {
     border: none;
   }

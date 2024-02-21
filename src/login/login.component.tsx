@@ -206,6 +206,14 @@ const Login: React.FC<LoginReferrer> = () => {
               <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
               support
             </span>
+            <div className={styles.attribution}>
+              <span className={styles["powered-by-txt"]}>
+                {t("poweredBy", "Powered by")}
+              </span>
+              <svg role="img" className={styles["powered-by-logo"]}>
+                <use xlinkHref="#omrs-logo-partial-mono"></use>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
