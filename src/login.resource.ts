@@ -73,7 +73,7 @@ export async function performLogin(
   }
 
   const locationAttr = providerResponse.data.results[0].attributes.find(
-    (x) => x.attributeType?.display === "Default Location"
+    (x) => x.attributeType?.uuid === "13a721e4-68e5-4f7a-8aee-3cbcec127179"
   );
 
   if (!locationAttr) {
