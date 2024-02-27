@@ -56,7 +56,7 @@ export async function performLogin(
 
   // console.log(loginResponse);
 
-  const providerUrl = `/ws/rest/v1/provider?user=${loginResponse.data?.user?.uuid}&v=full`;
+  const providerUrl = `/ws/rest/v1/provider?user=${loginResponse.data?.user?.uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
 
   const providerResponse: FetchResponse<ProviderResponse> = await openmrsFetch(
     providerUrl,
@@ -72,15 +72,15 @@ export async function performLogin(
     await logoutIfNoCredentials(sessionUrl, abortController);
   }
 
-  const locationAttr = providerResponse.data.results[0].attributes.find(
-    (x) => x.attributeType?.uuid === "13a721e4-68e5-4f7a-8aee-3cbcec127179"
-  );
+  const locationAttr = providerResponse?.data?.results[0]?.attributes?.find(
+    (x) => x?.attributeType?.uuid === "13a721e4-68e5-4f7a-8aee-3cbcec127179"
+  )?.value?.uuid;
 
   if (!locationAttr) {
     await logoutIfNoCredentials(sessionUrl, abortController);
   }
 
-  await setSessionLocation(locationAttr.value.uuid, new AbortController());
+  await setSessionLocation(locationAttr, new AbortController());
 }
 
 interface LoginLocationData {
