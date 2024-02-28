@@ -5,12 +5,12 @@ import {
   FetchResponse,
   fhirBaseUrl,
   openmrsFetch,
-  restBaseUrl,
   setSessionLocation,
   showNotification,
 } from "@openmrs/esm-framework";
 import {
   hasAttribute,
+  SessionResponse,
   type LocationEntry,
   type LocationResponse,
   type ProviderResponse,
@@ -39,9 +39,9 @@ export async function performLogin(
 ): Promise<void> {
   const abortController = new AbortController();
   const token = window.btoa(`${username}:${password}`);
-  const sessionUrl = `${restBaseUrl}/session`;
+  const sessionUrl = `/ws/rest/v1/session`;
 
-  const providerUrl = `${restBaseUrl}/provider?user=${uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
+  const providerUrl = `/ws/rest/v1/provider?user=${uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
 
   const providerResponse: FetchResponse<ProviderResponse> = await openmrsFetch(
     providerUrl,
