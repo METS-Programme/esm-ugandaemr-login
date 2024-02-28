@@ -5,12 +5,12 @@ import {
   FetchResponse,
   fhirBaseUrl,
   openmrsFetch,
+  restBaseUrl,
   setSessionLocation,
   showNotification,
 } from "@openmrs/esm-framework";
 import {
   hasAttribute,
-  SessionResponse,
   type LocationEntry,
   type LocationResponse,
   type ProviderResponse,
@@ -33,30 +33,15 @@ async function logoutIfNoCredentials(
 }
 
 export async function performLogin(
+  uuid: string,
   username: string,
   password: string
 ): Promise<void> {
   const abortController = new AbortController();
   const token = window.btoa(`${username}:${password}`);
-  const sessionUrl = `/ws/rest/v1/session`;
+  const sessionUrl = `${restBaseUrl}/session`;
 
-  const loginResponse: FetchResponse<SessionResponse> = await openmrsFetch(
-    sessionUrl,
-    {
-      headers: {
-        Authorization: `Basic ${token}`,
-      },
-      signal: abortController.signal,
-    }
-  );
-
-  if (!loginResponse.data?.user?.uuid) {
-    throw new Error("Invalid Credentials");
-  }
-
-  // console.log(loginResponse);
-
-  const providerUrl = `/ws/rest/v1/provider?user=${loginResponse.data?.user?.uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
+  const providerUrl = `${restBaseUrl}/provider?user=${uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
 
   const providerResponse: FetchResponse<ProviderResponse> = await openmrsFetch(
     providerUrl,
