@@ -33,6 +33,7 @@ async function logoutIfNoCredentials(
 }
 
 export async function performLogin(
+  uuid: string,
   username: string,
   password: string
 ): Promise<void> {
@@ -40,23 +41,7 @@ export async function performLogin(
   const token = window.btoa(`${username}:${password}`);
   const sessionUrl = `/ws/rest/v1/session`;
 
-  const loginResponse: FetchResponse<SessionResponse> = await openmrsFetch(
-    sessionUrl,
-    {
-      headers: {
-        Authorization: `Basic ${token}`,
-      },
-      signal: abortController.signal,
-    }
-  );
-
-  if (!loginResponse.data?.user?.uuid) {
-    throw new Error("Invalid Credentials");
-  }
-
-  // console.log(loginResponse);
-
-  const providerUrl = `/ws/rest/v1/provider?user=${loginResponse.data?.user?.uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
+  const providerUrl = `/ws/rest/v1/provider?user=${uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
 
   const providerResponse: FetchResponse<ProviderResponse> = await openmrsFetch(
     providerUrl,

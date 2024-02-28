@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { type To, useLocation, useNavigate } from "react-router-dom";
 import {
   Button,
   InlineLoading,
@@ -10,31 +10,41 @@ import {
 } from "@carbon/react";
 import { ArrowRight } from "@carbon/react/icons";
 import { useTranslation } from "react-i18next";
+
+import Logo from "./logo.component";
+import styles from "./login.scss";
+import { ConfigSchema } from "../config-schema";
 import {
-  clearCurrentUser,
-  getSessionStore,
-  interpolateUrl,
-  navigate,
-  refetchCurrentUser,
   useConfig,
   useConnectivity,
   useSession,
+  refetchCurrentUser,
+  navigate as openmrsNavigate,
+  clearCurrentUser,
+  getSessionStore,
 } from "@openmrs/esm-framework";
 import { performLogin } from "../login.resource";
-import Logo from "./logo.component";
-import styles from "./login.scss";
-
 export interface LoginReferrer {
   referrer?: string;
 }
 
 const Login: React.FC<LoginReferrer> = () => {
-  const config = useConfig();
+  const { provider: loginProvider, links: loginLinks } =
+    useConfig<ConfigSchema>();
   const isLoginEnabled = useConnectivity();
   const { t } = useTranslation();
   const { user } = useSession();
-  const location = useLocation();
-  const nav = useNavigate();
+  const location = useLocation() as unknown as Omit<Location, "state"> & {
+    state: LoginReferrer;
+  };
+
+  const rawNavigate = useNavigate();
+  const navigate = useCallback(
+    (to: To) => {
+      rawNavigate(to, { state: location.state });
+    },
+    [rawNavigate, location.state]
+  );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -49,21 +59,17 @@ const Login: React.FC<LoginReferrer> = () => {
       refetchCurrentUser().then(() => {
         const authenticated =
           getSessionStore().getState().session.authenticated;
-        if (authenticated) {
-          nav("/home", { state: location.state });
+        if (
+          authenticated &&
+          getSessionStore().getState().session.sessionLocation.uuid !== null
+        ) {
+          navigate("/home");
         }
       });
     } else if (!username && location.pathname === "/login/confirm") {
-      nav("/login", { state: location.state });
+      navigate("/login");
     }
-  }, [username, nav, location, user]);
-
-  useEffect(() => {
-    if (!user && config.provider.type === "oauth2") {
-      const loginUrl = config.provider.loginUrl;
-      window.location.href = loginUrl;
-    }
-  }, [config, user]);
+  }, [username, navigate, location, user]);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
@@ -87,8 +93,10 @@ const Login: React.FC<LoginReferrer> = () => {
 
       try {
         setIsLoggingIn(true);
-        await performLogin(username, password);
-        navigate({ to: config.links.loginSuccess });
+        const sessionStore = await refetchCurrentUser(username, password);
+        const session = sessionStore.session;
+        await performLogin(session.user?.uuid, username, password);
+        navigate(loginLinks.loginSuccess);
       } catch (error) {
         setErrorMessage(error.message);
         resetUserNameAndPassword();
@@ -99,23 +107,16 @@ const Login: React.FC<LoginReferrer> = () => {
       return false;
     },
 
-    [username, password, config.links.loginSuccess, resetUserNameAndPassword]
+    [
+      username,
+      password,
+      navigate,
+      loginLinks.loginSuccess,
+      resetUserNameAndPassword,
+    ]
   );
 
-  const logo = config.logo.src ? (
-    <img
-      src={interpolateUrl(config.logo.src)}
-      alt={config.logo.alt}
-      className={styles["logo-img"]}
-    />
-  ) : (
-    <svg role="img" className={styles["logo"]}>
-      <title>OpenMRS logo</title>
-      <use xlinkHref="#omrs-logo-full-color"></use>
-    </svg>
-  );
-
-  if (config.provider.type === "basic") {
+  if (!loginProvider || loginProvider.type === "basic") {
     return (
       <div className={`canvas ${styles["container"]}`}>
         <div className={styles.section}>
@@ -184,7 +185,7 @@ const Login: React.FC<LoginReferrer> = () => {
                           description={t("loggingIn", "Logging in") + "..."}
                         />
                       ) : (
-                        <span>{t("login", "Log in")}</span>
+                        <span>Log in</span>
                       )}
                     </Button>
                   </div>
@@ -207,9 +208,7 @@ const Login: React.FC<LoginReferrer> = () => {
               support
             </span>
             <div className={styles.attribution}>
-              <span className={styles["powered-by-txt"]}>
-                {t("poweredBy", "Powered by")}
-              </span>
+              <span className={styles["powered-by-txt"]}>Powered by</span>
               <svg role="img" className={styles["powered-by-logo"]}>
                 <use xlinkHref="#omrs-logo-partial-mono"></use>
               </svg>
