@@ -61,12 +61,12 @@ const Login: React.FC<LoginReferrer> = () => {
           getSessionStore().getState().session.authenticated;
         if (
           authenticated &&
-          getSessionStore().getState().session.sessionLocation.uuid !== null
+          getSessionStore()?.getState()?.session?.sessionLocation?.uuid !== null
         ) {
           navigate("/home");
         }
       });
-    } else if (!username && location.pathname === "/login/confirm") {
+    } else if (!username && location?.pathname === "/login/confirm") {
       navigate("/login");
     }
   }, [username, navigate, location, user]);
@@ -94,7 +94,7 @@ const Login: React.FC<LoginReferrer> = () => {
       try {
         setIsLoggingIn(true);
         const sessionStore = await refetchCurrentUser(username, password);
-        const session = sessionStore.session;
+        const session = sessionStore?.session;
         await performLogin(session.user?.uuid, username, password);
         navigate(loginLinks.loginSuccess);
       } catch (error) {
@@ -116,7 +116,7 @@ const Login: React.FC<LoginReferrer> = () => {
     ]
   );
 
-  if (!loginProvider || loginProvider.type === "basic") {
+  if (!loginProvider || loginProvider?.type === "basic") {
     return (
       <div className={`canvas ${styles["container"]}`}>
         <div className={styles.section}>
