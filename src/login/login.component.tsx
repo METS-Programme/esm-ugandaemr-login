@@ -58,7 +58,7 @@ const Login: React.FC<LoginReferrer> = () => {
       clearCurrentUser();
       refetchCurrentUser().then(() => {
         const authenticated =
-          getSessionStore().getState().session.authenticated;
+          getSessionStore()?.getState()?.session?.authenticated;
         if (
           authenticated &&
           getSessionStore()?.getState()?.session?.sessionLocation?.uuid !== null
