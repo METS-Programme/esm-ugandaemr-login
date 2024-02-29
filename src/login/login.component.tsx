@@ -35,10 +35,13 @@ const Login: React.FC<LoginReferrer> = () => {
   const { t } = useTranslation();
   const { user } = useSession();
   const nav = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [state, setState] = useState({
+    username: "",
+    password: "",
+    errorMessage: "",
+    isLoggingIn: false,
+  });
+  const { username, password, errorMessage, isLoggingIn } = state;
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -61,19 +64,24 @@ const Login: React.FC<LoginReferrer> = () => {
     }
   }, [username, user, nav]);
 
-  const changeUsername = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
-    []
-  );
-
-  const changePassword = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setPassword(evt.target.value),
+  const handleChange = useCallback(
+    (field: "username" | "password") =>
+      (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setState((prevState) => ({
+          ...prevState,
+          [field]: evt.target.value,
+        }));
+      },
     []
   );
 
   const resetUserNameAndPassword = useCallback(() => {
-    setUsername("");
-    setPassword("");
+    setState({
+      username: "",
+      password: "",
+      errorMessage: "",
+      isLoggingIn: false,
+    });
   }, []);
 
   const handleSubmit = useCallback(
@@ -82,7 +90,10 @@ const Login: React.FC<LoginReferrer> = () => {
       evt.stopPropagation();
 
       try {
-        setIsLoggingIn(true);
+        setState((prevState) => ({
+          ...prevState,
+          isLoggingIn: true,
+        }));
         const sessionStore = await refetchCurrentUser(username, password);
         getProvider(sessionStore?.session?.user?.uuid, username, password).then(
           (res) => {
@@ -97,20 +108,28 @@ const Login: React.FC<LoginReferrer> = () => {
           },
           (error) => {
             const err = extractErrorMessagesFromResponse(error);
-            setErrorMessage(err.join(","));
+            setState((prevState) => ({
+              ...prevState,
+              errorMessage: err.join(","),
+            }));
           }
         );
       } catch (error) {
         const err = extractErrorMessagesFromResponse(error);
-        setErrorMessage(err.join(","));
+        setState((prevState) => ({
+          ...prevState,
+          errorMessage: err.join(","),
+        }));
         resetUserNameAndPassword();
       } finally {
-        setIsLoggingIn(false);
+        setState((prevState) => ({
+          ...prevState,
+          isLoggingIn: false,
+        }));
       }
 
       return true;
     },
-
     [username, password, resetUserNameAndPassword]
   );
 
@@ -124,13 +143,8 @@ const Login: React.FC<LoginReferrer> = () => {
               <InlineNotification
                 className={styles.errorMessage}
                 kind="error"
-                /**
-                 * This comment tells i18n to still keep the following translation keys (used as value for: errorMessage):
-                 * t('invalidCredentials')
-                 */
                 subtitle={t(errorMessage)}
                 title={t("error", "Error")}
-                onClick={() => setErrorMessage("")}
               />
             )}
             <form onSubmit={handleSubmit} ref={formRef}>
@@ -142,7 +156,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     name="username"
                     labelText={t("username", "Username")}
                     value={username}
-                    onChange={changeUsername}
+                    onChange={handleChange("username")}
                     ref={usernameInputRef}
                     autoFocus
                     required
@@ -159,7 +173,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     labelText={t("password", "Password")}
                     name="password"
                     value={password}
-                    onChange={changePassword}
+                    onChange={handleChange("password")}
                     ref={passwordInputRef}
                     required
                     showPasswordLabel="Show password"
