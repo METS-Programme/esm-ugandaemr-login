@@ -19,6 +19,9 @@ import {
   useConnectivity,
   refetchCurrentUser,
   setSessionLocation,
+  useSession,
+  clearCurrentUser,
+  getSessionStore,
 } from "@openmrs/esm-framework";
 import { getProvider } from "../login.resource";
 import { extractErrorMessagesFromResponse } from "../utils";
@@ -30,6 +33,8 @@ const Login: React.FC<LoginReferrer> = () => {
   const { provider: loginProvider } = useConfig<ConfigSchema>();
   const isLoginEnabled = useConnectivity();
   const { t } = useTranslation();
+  const { user } = useSession();
+  const nav = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,6 +42,24 @@ const Login: React.FC<LoginReferrer> = () => {
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      clearCurrentUser();
+      refetchCurrentUser().then(() => {
+        const authenticated =
+          getSessionStore()?.getState()?.session?.authenticated;
+        if (
+          authenticated &&
+          getSessionStore()?.getState()?.session?.sessionLocation?.uuid !== null
+        ) {
+          nav("/home");
+        }
+      });
+    } else if (!username && location?.pathname === "/login/confirm") {
+      nav("/login");
+    }
+  }, [username, user, nav]);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
@@ -85,7 +108,7 @@ const Login: React.FC<LoginReferrer> = () => {
         setIsLoggingIn(false);
       }
 
-      return false;
+      return true;
     },
 
     [username, password, resetUserNameAndPassword]
