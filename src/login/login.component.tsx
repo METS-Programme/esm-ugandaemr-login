@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { type To, useLocation, useNavigate } from "react-router-dom";
+import { type To, useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
   InlineLoading,
@@ -17,38 +17,31 @@ import { ConfigSchema } from "../config-schema";
 import {
   useConfig,
   useConnectivity,
-  useSession,
   refetchCurrentUser,
-  navigate as openmrsNavigate,
+  setSessionLocation,
+  useSession,
   clearCurrentUser,
   getSessionStore,
 } from "@openmrs/esm-framework";
-import { performLogin } from "../login.resource";
+import { getProvider } from "../login.resource";
+import { extractErrorMessagesFromResponse } from "../utils";
 export interface LoginReferrer {
   referrer?: string;
 }
 
 const Login: React.FC<LoginReferrer> = () => {
-  const { provider: loginProvider, links: loginLinks } =
-    useConfig<ConfigSchema>();
+  const { provider: loginProvider } = useConfig<ConfigSchema>();
   const isLoginEnabled = useConnectivity();
   const { t } = useTranslation();
   const { user } = useSession();
-  const location = useLocation() as unknown as Omit<Location, "state"> & {
-    state: LoginReferrer;
-  };
-
-  const rawNavigate = useNavigate();
-  const navigate = useCallback(
-    (to: To) => {
-      rawNavigate(to, { state: location.state });
-    },
-    [rawNavigate, location.state]
-  );
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const nav = useNavigate();
+  const [state, setState] = useState({
+    username: "",
+    password: "",
+    errorMessage: "",
+    isLoggingIn: false,
+  });
+  const { username, password, errorMessage, isLoggingIn } = state;
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -63,27 +56,32 @@ const Login: React.FC<LoginReferrer> = () => {
           authenticated &&
           getSessionStore()?.getState()?.session?.sessionLocation?.uuid !== null
         ) {
-          navigate("/home");
+          nav("/home");
         }
       });
     } else if (!username && location?.pathname === "/login/confirm") {
-      navigate("/login");
+      nav("/login");
     }
-  }, [username, navigate, location, user]);
+  }, [username, user, nav]);
 
-  const changeUsername = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
-    []
-  );
-
-  const changePassword = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => setPassword(evt.target.value),
+  const handleChange = useCallback(
+    (field: "username" | "password") =>
+      (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setState((prevState) => ({
+          ...prevState,
+          [field]: evt.target.value,
+        }));
+      },
     []
   );
 
   const resetUserNameAndPassword = useCallback(() => {
-    setUsername("");
-    setPassword("");
+    setState({
+      username: "",
+      password: "",
+      errorMessage: "",
+      isLoggingIn: false,
+    });
   }, []);
 
   const handleSubmit = useCallback(
@@ -92,28 +90,47 @@ const Login: React.FC<LoginReferrer> = () => {
       evt.stopPropagation();
 
       try {
-        setIsLoggingIn(true);
+        setState((prevState) => ({
+          ...prevState,
+          isLoggingIn: true,
+        }));
         const sessionStore = await refetchCurrentUser(username, password);
-        const session = sessionStore?.session;
-        await performLogin(session.user?.uuid, username, password);
-        navigate(loginLinks.loginSuccess);
+        getProvider(sessionStore?.session?.user?.uuid, username, password).then(
+          (res) => {
+            const locationAttr = res?.data?.results[0]?.attributes?.find(
+              (x) =>
+                x?.attributeType?.uuid ===
+                "13a721e4-68e5-4f7a-8aee-3cbcec127179"
+            )?.value?.uuid;
+
+            setSessionLocation(locationAttr, new AbortController());
+            window.location.href = `${window.getOpenmrsSpaBase()}home`;
+          },
+          (error) => {
+            const err = extractErrorMessagesFromResponse(error);
+            setState((prevState) => ({
+              ...prevState,
+              errorMessage: err.join(","),
+            }));
+          }
+        );
       } catch (error) {
-        setErrorMessage(error.message);
+        const err = extractErrorMessagesFromResponse(error);
+        setState((prevState) => ({
+          ...prevState,
+          errorMessage: err.join(","),
+        }));
         resetUserNameAndPassword();
       } finally {
-        setIsLoggingIn(false);
+        setState((prevState) => ({
+          ...prevState,
+          isLoggingIn: false,
+        }));
       }
 
-      return false;
+      return true;
     },
-
-    [
-      username,
-      password,
-      navigate,
-      loginLinks.loginSuccess,
-      resetUserNameAndPassword,
-    ]
+    [username, password, resetUserNameAndPassword]
   );
 
   if (!loginProvider || loginProvider?.type === "basic") {
@@ -126,13 +143,8 @@ const Login: React.FC<LoginReferrer> = () => {
               <InlineNotification
                 className={styles.errorMessage}
                 kind="error"
-                /**
-                 * This comment tells i18n to still keep the following translation keys (used as value for: errorMessage):
-                 * t('invalidCredentials')
-                 */
                 subtitle={t(errorMessage)}
                 title={t("error", "Error")}
-                onClick={() => setErrorMessage("")}
               />
             )}
             <form onSubmit={handleSubmit} ref={formRef}>
@@ -144,7 +156,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     name="username"
                     labelText={t("username", "Username")}
                     value={username}
-                    onChange={changeUsername}
+                    onChange={handleChange("username")}
                     ref={usernameInputRef}
                     autoFocus
                     required
@@ -161,7 +173,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     labelText={t("password", "Password")}
                     name="password"
                     value={password}
-                    onChange={changePassword}
+                    onChange={handleChange("password")}
                     ref={passwordInputRef}
                     required
                     showPasswordLabel="Show password"
