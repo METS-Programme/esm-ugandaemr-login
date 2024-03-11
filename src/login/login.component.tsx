@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { type To, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   InlineLoading,
@@ -22,6 +22,7 @@ import {
   useSession,
   clearCurrentUser,
   getSessionStore,
+  navigate,
 } from "@openmrs/esm-framework";
 import { getProvider } from "../login.resource";
 import { extractErrorMessagesFromResponse } from "../utils";
@@ -56,11 +57,14 @@ const Login: React.FC<LoginReferrer> = () => {
           authenticated &&
           getSessionStore()?.getState()?.session?.sessionLocation?.uuid !== null
         ) {
-          nav("/home");
+          // nav("/home"); // fix this
+          navigate({ to: "${openmrsSpaBase}/home" });
+          window.location.href = `${window.getOpenmrsSpaBase()}home`;
         }
       });
     } else if (!username && location?.pathname === "/login/confirm") {
-      nav("/login");
+      // nav("/login"); // fix this
+      navigate({ to: "/login" });
     }
   }, [username, user, nav]);
 
@@ -105,6 +109,7 @@ const Login: React.FC<LoginReferrer> = () => {
 
             setSessionLocation(locationAttr, new AbortController());
             window.location.href = `${window.getOpenmrsSpaBase()}home`;
+            resetUserNameAndPassword();
           },
           (error) => {
             const err = extractErrorMessagesFromResponse(error);
@@ -112,13 +117,14 @@ const Login: React.FC<LoginReferrer> = () => {
               ...prevState,
               errorMessage: err.join(","),
             }));
+            resetUserNameAndPassword();
           }
         );
       } catch (error) {
         const err = extractErrorMessagesFromResponse(error);
         setState((prevState) => ({
           ...prevState,
-          errorMessage: err.join(","),
+          errorMessage: err.join(",") || error.message,
         }));
         resetUserNameAndPassword();
       } finally {
