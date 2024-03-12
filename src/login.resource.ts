@@ -5,10 +5,16 @@ import {
   FetchResponse,
   fhirBaseUrl,
   openmrsFetch,
-  restBaseUrl,
+  setSessionLocation,
   showNotification,
 } from "@openmrs/esm-framework";
-import { type LocationEntry, type LocationResponse } from "./types";
+import {
+  hasAttribute,
+  SessionResponse,
+  type LocationEntry,
+  type LocationResponse,
+  type ProviderResponse,
+} from "./types";
 
 // Logout if default location is missing
 async function logoutIfNoCredentials(
@@ -26,20 +32,55 @@ async function logoutIfNoCredentials(
   throw new Error("Invalid Credentials");
 }
 
-export async function getProvider(
-  uuid: string,
+export async function performLogin(
   username: string,
   password: string
-) {
-  const token = window.btoa(`${username}:${password}`);
+): Promise<void> {
   const abortController = new AbortController();
-  const providerUrl = `${restBaseUrl}/provider?user=${uuid}&v=custom:(uuid,attributes:(uuid,attributeType:(uuid,display),value:(uuid,name)))`;
+  const token = window.btoa(`${username}:${password}`);
+  const sessionUrl = `/ws/rest/v1/session`;
 
-  return await openmrsFetch(providerUrl, {
-    method: "GET",
-    headers: { Authorization: `Basic ${token}` },
-    signal: abortController.signal,
-  });
+  const loginResponse: FetchResponse<SessionResponse> = await openmrsFetch(
+    sessionUrl,
+    {
+      headers: {
+        Authorization: `Basic ${token}`,
+      },
+      signal: abortController.signal,
+    }
+  );
+
+  if (!loginResponse.data?.user?.uuid) {
+    throw new Error("Invalid Credentials");
+  }
+
+  // console.log(loginResponse);
+
+  const providerUrl = `/ws/rest/v1/provider?user=${loginResponse.data?.user?.uuid}&v=full`;
+
+  const providerResponse: FetchResponse<ProviderResponse> = await openmrsFetch(
+    providerUrl,
+    {
+      headers: {
+        Authorization: `Basic ${token}`,
+      },
+      signal: abortController.signal,
+    }
+  );
+
+  if (!hasAttribute(providerResponse.data)) {
+    await logoutIfNoCredentials(sessionUrl, abortController);
+  }
+
+  const locationAttr = providerResponse.data.results[0].attributes.find(
+    (x) => x.attributeType?.display === "Default Location"
+  );
+
+  if (!locationAttr) {
+    await logoutIfNoCredentials(sessionUrl, abortController);
+  }
+
+  await setSessionLocation(locationAttr.value.uuid, new AbortController());
 }
 
 interface LoginLocationData {
