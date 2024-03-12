@@ -72,24 +72,3 @@ export const configSchema = {
     },
   },
 };
-
-export interface ConfigSchema {
-  provider: {
-    type: string;
-    loginUrl: string;
-    logoutUrl: string;
-  };
-  chooseLocation: {
-    enabled: boolean;
-    numberToShow: number;
-    locationsPerRequest: number;
-    useLoginLocationTag: boolean;
-  };
-  links: {
-    loginSuccess: string;
-  };
-  logo: {
-    src: string;
-    alt: string;
-  };
-}
