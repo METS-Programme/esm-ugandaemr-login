@@ -16,11 +16,12 @@ import {
   interpolateUrl,
   navigate,
   refetchCurrentUser,
+  setSessionLocation,
   useConfig,
   useConnectivity,
   useSession,
 } from "@openmrs/esm-framework";
-import { performLogin } from "../login.resource";
+import { getProvider, performLogin } from "../login.resource";
 import Logo from "./logo.component";
 import styles from "./login.scss";
 
@@ -42,21 +43,29 @@ const Login: React.FC<LoginReferrer> = () => {
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [hasUserLocation, setHasUserLocation] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (hasUserLocation) {
       clearCurrentUser();
       refetchCurrentUser().then(() => {
         const authenticated =
           getSessionStore().getState().session.authenticated;
         if (authenticated) {
-          nav("/home", { state: location.state });
+          navigate({ to: config.links.loginSuccess });
         }
       });
     } else if (!username && location.pathname === "/login/confirm") {
       nav("/login", { state: location.state });
     }
-  }, [username, nav, location, user]);
+  }, [
+    username,
+    nav,
+    location,
+    user,
+    hasUserLocation,
+    config.links.loginSuccess,
+  ]);
 
   useEffect(() => {
     if (!user && config.provider.type === "oauth2") {
@@ -85,21 +94,50 @@ const Login: React.FC<LoginReferrer> = () => {
       evt.preventDefault();
       evt.stopPropagation();
 
-      try {
-        setIsLoggingIn(true);
-        await performLogin(username, password);
-        navigate({ to: config.links.loginSuccess });
-      } catch (error) {
-        setErrorMessage(error.message);
-        resetUserNameAndPassword();
-      } finally {
-        setIsLoggingIn(false);
-      }
+      setIsLoggingIn(true);
+      const token = window.btoa(`${username}:${password}`);
+      performLogin(token).then(
+        (loginResponse) => {
+          if (
+            loginResponse.status === 200 &&
+            loginResponse?.data?.authenticated
+          ) {
+            const userUUID = loginResponse.data?.user?.uuid;
+            getProvider(userUUID, token).then(
+              async (providerResponse) => {
+                if (providerResponse.status === 200) {
+                  const userLocationUuid =
+                    providerResponse?.data?.results[0]?.attributes.find(
+                      (provider: any) =>
+                        provider.attributeType?.uuid ===
+                        "13a721e4-68e5-4f7a-8aee-3cbcec127179"
+                    )?.value?.uuid;
+                  setIsLoggingIn(false);
+                  setHasUserLocation(true);
 
-      return false;
+                  await setSessionLocation(
+                    userLocationUuid,
+                    new AbortController()
+                  );
+                }
+              },
+              (error) => {
+                setIsLoggingIn(false);
+                setErrorMessage(error?.message);
+              }
+            );
+          } else {
+            setIsLoggingIn(false);
+            setErrorMessage("Invalid Credentials");
+          }
+        },
+        (error) => {
+          setIsLoggingIn(false);
+          setErrorMessage(error?.message);
+        }
+      );
     },
-
-    [username, password, config.links.loginSuccess, resetUserNameAndPassword]
+    [password, username]
   );
 
   const logo = config.logo.src ? (
