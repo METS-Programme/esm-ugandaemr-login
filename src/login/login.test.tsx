@@ -3,7 +3,7 @@ import { waitFor, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useConfig, useSession } from "@openmrs/esm-framework";
 import { mockConfig } from "../../__mocks__/config.mock";
-import { performLogin } from "../login.resource";
+import { performLogin } from "./login.resource";
 import renderWithRouter from "../test-helpers/render-with-router";
 import Login from "./login.component";
 
@@ -30,7 +30,7 @@ jest.mock("@openmrs/esm-framework", () => {
   };
 });
 
-jest.mock("../login.resource", () => ({
+jest.mock("./login.resource", () => ({
   performLogin: jest.fn(),
 }));
 

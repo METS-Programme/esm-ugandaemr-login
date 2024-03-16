@@ -1,12 +1,12 @@
 import { openmrsFetch, restBaseUrl } from "@openmrs/esm-framework";
-import { sessionEndpoint } from "@openmrs/esm-api/src/openmrs-fetch";
+export const sessionURL = `/ws/rest/v1/session`;
 
 // Logout if default location is missing
 export async function logoutIfNoCredentials(
   sessionUrl: string,
   abortController: AbortController
 ) {
-  await openmrsFetch(sessionUrl, {
+  await openmrsFetch(sessionURL, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export async function logoutIfNoCredentials(
 export async function performLogin(token: string) {
   const abortController = new AbortController();
 
-  return await openmrsFetch(sessionEndpoint, {
+  return await openmrsFetch(sessionURL, {
     headers: {
       Authorization: `Basic ${token}`,
     },

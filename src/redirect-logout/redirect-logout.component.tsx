@@ -5,7 +5,7 @@ import {
   useConnectivity,
   useSession,
 } from "@openmrs/esm-framework";
-import { performLogout } from "./logout.resource";
+import { performLogout } from "../logout/logout.resource";
 
 const RedirectLogout: React.FC = () => {
   const config = useConfig();
