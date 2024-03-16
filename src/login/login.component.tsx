@@ -13,7 +13,6 @@ import { useTranslation } from "react-i18next";
 import {
   clearCurrentUser,
   getSessionStore,
-  interpolateUrl,
   navigate,
   refetchCurrentUser,
   setSessionLocation,
@@ -67,13 +66,6 @@ const Login: React.FC<LoginReferrer> = () => {
     config.links.loginSuccess,
   ]);
 
-  useEffect(() => {
-    if (!user && config.provider.type === "oauth2") {
-      const loginUrl = config.provider.loginUrl;
-      window.location.href = loginUrl;
-    }
-  }, [config, user]);
-
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
     []
@@ -83,11 +75,6 @@ const Login: React.FC<LoginReferrer> = () => {
     (evt: React.ChangeEvent<HTMLInputElement>) => setPassword(evt.target.value),
     []
   );
-
-  const resetUserNameAndPassword = useCallback(() => {
-    setUsername("");
-    setPassword("");
-  }, []);
 
   const handleSubmit = useCallback(
     async (evt: React.FormEvent<HTMLFormElement>) => {
@@ -110,7 +97,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     providerResponse?.data?.results[0]?.attributes.find(
                       (provider: any) =>
                         provider.attributeType?.uuid ===
-                        "13a721e4-68e5-4f7a-8aee-3cbcec127179"
+                        config.provider.attributeTypeUUID
                     )?.value?.uuid;
                   setIsLoggingIn(false);
                   setHasUserLocation(true);
@@ -137,20 +124,7 @@ const Login: React.FC<LoginReferrer> = () => {
         }
       );
     },
-    [password, username]
-  );
-
-  const logo = config.logo.src ? (
-    <img
-      src={interpolateUrl(config.logo.src)}
-      alt={config.logo.alt}
-      className={styles["logo-img"]}
-    />
-  ) : (
-    <svg role="img" className={styles["logo"]}>
-      <title>OpenMRS logo</title>
-      <use xlinkHref="#omrs-logo-full-color"></use>
-    </svg>
+    [config.provider.attributeTypeUUID, password, username]
   );
 
   if (config.provider.type === "basic") {
@@ -163,10 +137,6 @@ const Login: React.FC<LoginReferrer> = () => {
               <InlineNotification
                 className={styles.errorMessage}
                 kind="error"
-                /**
-                 * This comment tells i18n to still keep the following translation keys (used as value for: errorMessage):
-                 * t('invalidCredentials')
-                 */
                 subtitle={t(errorMessage)}
                 title={t("error", "Error")}
                 onClick={() => setErrorMessage("")}

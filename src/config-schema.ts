@@ -21,32 +21,10 @@ export const configSchema = {
       _description: "The URL to use for an OAuth2 logout.",
       _validators: [validators.isUrl],
     },
-  },
-  chooseLocation: {
-    enabled: {
-      _type: Type.Boolean,
-      _default: false,
-      _description:
-        "Whether to show a 'Choose Location' screen after login. " +
-        "If true, the user will be taken to the loginSuccess URL after they " +
-        "choose a location.",
-    },
-    numberToShow: {
-      _type: Type.Number,
-      _default: 8,
-      _description: "The number of locations displayed on location picker",
-    },
-    locationsPerRequest: {
-      _type: Type.Number,
-      _default: 50,
-      _description:
-        "The number of results to be fetched in each cycle of the infinite scroll",
-    },
-    useLoginLocationTag: {
-      _type: Type.Boolean,
-      _default: true,
-      _description:
-        "Whether to show only locations with the 'Login Location' tag. If false, shows all locations.",
+    attributeTypeUUID: {
+      _type: Type.String,
+      _default: "13a721e4-68e5-4f7a-8aee-3cbcec127179",
+      _description: "The UUID for picking provider's default location",
     },
   },
   links: {

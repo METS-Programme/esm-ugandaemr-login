@@ -4,15 +4,14 @@ import {
   refetchCurrentUser,
 } from "@openmrs/esm-framework";
 import { mutate } from "swr";
+import { sessionEndpoint } from "@openmrs/esm-api/src/openmrs-fetch";
 
 export async function performLogout() {
-  await openmrsFetch("/ws/rest/v1/session", {
+  await openmrsFetch(sessionEndpoint, {
     method: "DELETE",
   });
 
-  // clear the SWR cache on logout, do not revalidate
-  // taken from the SWR docs
-  mutate(() => true, undefined, { revalidate: false });
+  await mutate(() => true, undefined, { revalidate: false });
 
   clearCurrentUser();
   await refetchCurrentUser();
