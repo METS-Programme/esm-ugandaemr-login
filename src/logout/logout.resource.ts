@@ -4,10 +4,10 @@ import {
   refetchCurrentUser,
 } from "@openmrs/esm-framework";
 import { mutate } from "swr";
-import { sessionEndpoint } from "@openmrs/esm-api/src/openmrs-fetch";
+import { sessionURL } from "../login/login.resource";
 
 export async function performLogout() {
-  await openmrsFetch(sessionEndpoint, {
+  await openmrsFetch(sessionURL, {
     method: "DELETE",
   });
 

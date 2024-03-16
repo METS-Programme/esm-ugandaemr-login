@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "source": true,
   "scripts": {
-    "start": "openmrs develop",
+    "start": "openmrs develop --backend http://localhost:8085",
     "serve": "webpack serve --mode=development",
     "debug": "npm run serve",
     "test": "cross-env TZ=UTC jest --config jest.config.js --verbose false --passWithNoTests",

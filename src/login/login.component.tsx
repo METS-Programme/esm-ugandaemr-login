@@ -18,9 +18,8 @@ import {
   setSessionLocation,
   useConfig,
   useConnectivity,
-  useSession,
 } from "@openmrs/esm-framework";
-import { getProvider, performLogin } from "../login.resource";
+import { getProvider, performLogin } from "./login.resource";
 import Logo from "./logo.component";
 import styles from "./login.scss";
 
@@ -32,7 +31,6 @@ const Login: React.FC<LoginReferrer> = () => {
   const config = useConfig();
   const isLoginEnabled = useConnectivity();
   const { t } = useTranslation();
-  const { user } = useSession();
   const location = useLocation();
   const nav = useNavigate();
   const [username, setUsername] = useState("");
@@ -57,14 +55,7 @@ const Login: React.FC<LoginReferrer> = () => {
     } else if (!username && location.pathname === "/login/confirm") {
       nav("/login", { state: location.state });
     }
-  }, [
-    username,
-    nav,
-    location,
-    user,
-    hasUserLocation,
-    config.links.loginSuccess,
-  ]);
+  }, [username, nav, location, hasUserLocation, config.links.loginSuccess]);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
