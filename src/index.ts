@@ -28,8 +28,3 @@ export const logoutButton = getAsyncLifecycle(
   () => import("./logout/logout.component"),
   options
 );
-
-export const changeLocationLink = getAsyncLifecycle(
-  () => import("./change-location-link/change-location-link.component"),
-  options
-);
