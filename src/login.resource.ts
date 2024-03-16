@@ -1,4 +1,5 @@
-import { openmrsFetch } from "@openmrs/esm-framework";
+import { openmrsFetch, restBaseUrl } from "@openmrs/esm-framework";
+import { sessionEndpoint } from "@openmrs/esm-api/src/openmrs-fetch";
 
 // Logout if default location is missing
 export async function logoutIfNoCredentials(
@@ -18,9 +19,8 @@ export async function logoutIfNoCredentials(
 
 export async function performLogin(token: string) {
   const abortController = new AbortController();
-  const sessionUrl = `/ws/rest/v1/session`;
 
-  return await openmrsFetch(sessionUrl, {
+  return await openmrsFetch(sessionEndpoint, {
     headers: {
       Authorization: `Basic ${token}`,
     },
@@ -30,7 +30,7 @@ export async function performLogin(token: string) {
 
 export async function getProvider(userUUID: string, token: string) {
   const abortController = new AbortController();
-  const providerUrl = `/ws/rest/v1/provider?user=${userUUID}&v=full`;
+  const providerUrl = `${restBaseUrl}/provider?user=${userUUID}&v=full`;
 
   return openmrsFetch(providerUrl, {
     headers: {
