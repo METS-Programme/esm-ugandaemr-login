@@ -1,4 +1,5 @@
 import { openmrsFetch, restBaseUrl } from "@openmrs/esm-framework";
+import useSWR from "swr";
 export const sessionURL = `/ws/rest/v1/session`;
 
 // Logout if default location is missing
@@ -38,4 +39,20 @@ export async function getProvider(userUUID: string, token: string) {
     },
     signal: abortController.signal,
   });
+}
+
+export function useFacilityName() {
+  const apiURL = `${restBaseUrl}/systemsetting/ugandaemr.healthCenterName`;
+
+  const { data, error, isLoading } = useSWR<{ data }, Error>(
+    apiURL,
+    openmrsFetch
+  );
+  const facilityName = data?.data?.value ?? "";
+
+  return {
+    facilityName,
+    isLoading,
+    isError: error,
+  };
 }

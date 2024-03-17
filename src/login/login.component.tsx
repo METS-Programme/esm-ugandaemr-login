@@ -19,7 +19,7 @@ import {
   useConfig,
   useConnectivity,
 } from "@openmrs/esm-framework";
-import { getProvider, performLogin } from "./login.resource";
+import { getProvider, performLogin, useFacilityName } from "./login.resource";
 import Logo from "./logo.component";
 import styles from "./login.scss";
 
@@ -33,6 +33,7 @@ const Login: React.FC<LoginReferrer> = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const nav = useNavigate();
+  const { facilityName } = useFacilityName();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -41,7 +42,6 @@ const Login: React.FC<LoginReferrer> = () => {
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [hasUserLocation, setHasUserLocation] = useState(false);
-
   useEffect(() => {
     if (hasUserLocation) {
       clearCurrentUser();
@@ -122,8 +122,11 @@ const Login: React.FC<LoginReferrer> = () => {
     return (
       <div className={`canvas ${styles["container"]}`}>
         <div className={styles.section}>
-          <Tile className={styles["login-card"]}>
+          <div className={styles.logoContainer}>
             <Logo className={styles.logo} />
+          </div>
+          <Tile className={styles["login-card"]}>
+            <div className={styles.facilityNameContainer}>{facilityName}</div>
             {errorMessage && (
               <InlineNotification
                 className={styles.errorMessage}
@@ -193,7 +196,9 @@ const Login: React.FC<LoginReferrer> = () => {
           </Tile>
           <div className={styles.footer}>
             <div className={styles.links}>
-              <span>© {new Date().getFullYear()} All rights reserved</span>
+              <span className={styles.link}>
+                © {new Date().getFullYear()} All rights reserved
+              </span>
               <span className={styles.link}>
                 <a href="http://www.health.go.ug/">
                   Ministry of Health - Republic of Uganda
