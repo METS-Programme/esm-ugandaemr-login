@@ -198,7 +198,9 @@ const Login: React.FC<LoginReferrer> = () => {
           </Tile>
           <div className={styles.footer}>
             <div className={styles.links}>
-              <span>© {new Date().getFullYear()} All rights reserved</span>
+              <span className={styles.link}>
+                © {new Date().getFullYear()} All rights reserved
+              </span>
               <span className={styles.link}>
                 <a href="http://www.health.go.ug/">
                   Ministry of Health - Republic of Uganda
