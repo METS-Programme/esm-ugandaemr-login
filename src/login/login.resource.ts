@@ -48,7 +48,7 @@ export function useFacilityName() {
     apiURL,
     openmrsFetch
   );
-  const facilityName = data?.data?.value;
+  const facilityName = data?.data?.value ?? "";
 
   return {
     facilityName,

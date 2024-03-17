@@ -33,7 +33,7 @@ const Login: React.FC<LoginReferrer> = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const nav = useNavigate();
-  const facilityNameData = useFacilityName();
+  const { facilityName } = useFacilityName();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -126,9 +126,7 @@ const Login: React.FC<LoginReferrer> = () => {
             <Logo className={styles.logo} />
           </div>
           <Tile className={styles["login-card"]}>
-            <div className={styles.facilityNameContainer}>
-              {facilityNameData.facilityName || " "}
-            </div>
+            <div className={styles.facilityNameContainer}>{facilityName}</div>
             {errorMessage && (
               <InlineNotification
                 className={styles.errorMessage}
