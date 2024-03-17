@@ -42,13 +42,13 @@ export async function getProvider(userUUID: string, token: string) {
 }
 
 export function useFacilityName() {
-  const apiURL = `${restBaseUrl}/ugandaemr/gp?property=ugandaemr.healthCenterName`;
+  const apiURL = `${restBaseUrl}/systemsetting/ugandaemr.healthCenterName`;
 
-  const { data, error, isLoading } = useSWR<
-    { data: { results: Array<{ facilityName: string }> } },
-    Error
-  >(apiURL, openmrsFetch);
-  const facilityName = data?.data.results?.[0]?.facilityName;
+  const { data, error, isLoading } = useSWR<{ data }, Error>(
+    apiURL,
+    openmrsFetch
+  );
+  const facilityName = data?.data?.value;
 
   return {
     facilityName,
