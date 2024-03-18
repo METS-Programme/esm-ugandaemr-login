@@ -210,6 +210,9 @@ const Login: React.FC<LoginReferrer> = () => {
               <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
               support
             </span>
+            <span className={styles.link}>
+              Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
+            </span>
             <div className={styles.attribution}>
               <span className={styles["powered-by-txt"]}>
                 {t("poweredBy", "Powered by")}
