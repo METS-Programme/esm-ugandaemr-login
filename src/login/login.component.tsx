@@ -59,23 +59,24 @@ const Login: React.FC<LoginReferrer> = () => {
           if (roles && roles.length > 0) {
             if (roles.length > 1) {
               const filteredRoles = roles.filter(
-                (item) => item.display !== null
+                (item) => item.display === "Provider"
               );
               if (filteredRoles.length > 0) {
-                navigate({ to: "/home" });
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/clinical-room-patient-queues`,
+                });
                 return;
               }
             } else {
               const role = roles[0]?.display;
               if (role === "Triage") {
-                navigate({ to: "/triage-patient-queues" });
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/triage-patient-queues`,
+                });
               } else if (role === "Reception") {
-                navigate({ to: "/reception-patient-queues" });
-              } else if (
-                role === "Organizational: Clinician" ||
-                role === "Provider"
-              ) {
-                navigate({ to: "/clinical-room-patient-queues" });
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
+                });
               }
               return;
             }
