@@ -8,7 +8,7 @@ import {
   TextInput,
   Tile,
 } from "@carbon/react";
-import { ArrowRight } from "@carbon/react/icons";
+import { ArrowRight, IbmTelehealth } from "@carbon/react/icons";
 import { useTranslation } from "react-i18next";
 import {
   clearCurrentUser,
@@ -51,11 +51,40 @@ const Login: React.FC<LoginReferrer> = () => {
         const authenticated =
           getSessionStore().getState().session.authenticated;
         if (authenticated) {
-          navigate({ to: config.links.loginSuccess });
+          // check role logged in with and route
+
+          const roles = getSessionStore().getState().session?.user?.roles;
+
+          if (roles !== null && roles.length > 0) {
+            if (roles.length > 1) {
+              //filteredRoles
+              const filteredRoles = roles.filter((item) => {
+                item.display !== null;
+              });
+              if (filteredRoles.length > 0 && filteredRoles !== null) {
+                navigate({ to: "/home" });
+                return;
+              }
+            } else {
+              if (roles[0]?.display === "Triage") {
+                navigate({ to: "/triage-patient-queues" });
+                return;
+              } else if (roles[0]?.display === "Reception") {
+                navigate({ to: "/reception-patient-queues" });
+                return;
+              } else if (
+                roles[0]?.display === "Organizational: Clinician" ||
+                roles[0]?.display === "Provider"
+              ) {
+                navigate({ to: "/clinical-room-patient-queues" });
+                return;
+              }
+            }
+          }
         }
       });
-    } else if (!username && location.pathname === "/login/confirm") {
-      nav("/login", { state: location.state });
+    } else if (!username && location?.pathname === "/login/confirm") {
+      nav("/login", { state: location?.state });
     }
   }, [
     username,
