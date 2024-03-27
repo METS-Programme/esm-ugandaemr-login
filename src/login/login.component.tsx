@@ -59,7 +59,7 @@ const Login: React.FC<LoginReferrer> = () => {
           if (roles && roles.length > 0) {
             if (roles.length > 1) {
               const filteredRoles = roles.filter(
-                (item) => item.display === "Provider"
+                (item) => item?.display === "Provider"
               );
               if (filteredRoles.length > 0) {
                 navigate({
