@@ -45,45 +45,48 @@ const Login: React.FC<LoginReferrer> = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [hasUserLocation, setHasUserLocation] = useState(false);
   useEffect(() => {
-    if (hasUserLocation || user) {
+    const { pathname } = location;
+
+    const handleAuthenticatedUser = () => {
       clearCurrentUser();
       refetchCurrentUser().then(() => {
         const authenticated =
           getSessionStore().getState().session.authenticated;
-        if (authenticated) {
-          // check role logged in with and route
 
+        if (authenticated) {
           const roles = getSessionStore().getState().session?.user?.roles;
 
-          if (roles !== null && roles.length > 0) {
+          if (roles && roles.length > 0) {
             if (roles.length > 1) {
-              //filteredRoles
-              const filteredRoles = roles.filter((item) => {
-                item.display !== null;
-              });
-              if (filteredRoles.length > 0 && filteredRoles !== null) {
+              const filteredRoles = roles.filter(
+                (item) => item.display !== null
+              );
+              if (filteredRoles.length > 0) {
                 navigate({ to: "/home" });
                 return;
               }
             } else {
-              if (roles[0]?.display === "Triage") {
+              const role = roles[0]?.display;
+              if (role === "Triage") {
                 navigate({ to: "/triage-patient-queues" });
-                return;
-              } else if (roles[0]?.display === "Reception") {
+              } else if (role === "Reception") {
                 navigate({ to: "/reception-patient-queues" });
-                return;
               } else if (
-                roles[0]?.display === "Organizational: Clinician" ||
-                roles[0]?.display === "Provider"
+                role === "Organizational: Clinician" ||
+                role === "Provider"
               ) {
                 navigate({ to: "/clinical-room-patient-queues" });
-                return;
               }
+              return;
             }
           }
         }
       });
-    } else if (!username && location?.pathname === "/login/confirm") {
+    };
+
+    if (hasUserLocation || user) {
+      handleAuthenticatedUser();
+    } else if (!username && pathname === "/login/confirm") {
       nav("/login", { state: location?.state });
     }
   }, [
