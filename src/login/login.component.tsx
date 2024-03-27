@@ -18,6 +18,7 @@ import {
   setSessionLocation,
   useConfig,
   useConnectivity,
+  useSession,
 } from "@openmrs/esm-framework";
 import { getProvider, performLogin, useFacilityName } from "./login.resource";
 import Logo from "./logo.component";
@@ -33,6 +34,7 @@ const Login: React.FC<LoginReferrer> = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const nav = useNavigate();
+  const { user } = useSession();
   const { facilityName } = useFacilityName();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +45,7 @@ const Login: React.FC<LoginReferrer> = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [hasUserLocation, setHasUserLocation] = useState(false);
   useEffect(() => {
-    if (hasUserLocation) {
+    if (hasUserLocation || user) {
       clearCurrentUser();
       refetchCurrentUser().then(() => {
         const authenticated =
@@ -55,7 +57,14 @@ const Login: React.FC<LoginReferrer> = () => {
     } else if (!username && location.pathname === "/login/confirm") {
       nav("/login", { state: location.state });
     }
-  }, [username, nav, location, hasUserLocation, config.links.loginSuccess]);
+  }, [
+    username,
+    nav,
+    location,
+    hasUserLocation,
+    config.links.loginSuccess,
+    user,
+  ]);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
