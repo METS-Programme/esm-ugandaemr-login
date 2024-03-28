@@ -8,7 +8,7 @@ import {
   TextInput,
   Tile,
 } from "@carbon/react";
-import { ArrowRight } from "@carbon/react/icons";
+import { ArrowRight, IbmTelehealth } from "@carbon/react/icons";
 import { useTranslation } from "react-i18next";
 import {
   clearCurrentUser,
@@ -45,17 +45,50 @@ const Login: React.FC<LoginReferrer> = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [hasUserLocation, setHasUserLocation] = useState(false);
   useEffect(() => {
-    if (hasUserLocation || user) {
+    const { pathname } = location;
+
+    const handleAuthenticatedUser = () => {
       clearCurrentUser();
       refetchCurrentUser().then(() => {
         const authenticated =
           getSessionStore().getState().session.authenticated;
+
         if (authenticated) {
-          navigate({ to: config.links.loginSuccess });
+          const roles = getSessionStore().getState().session?.user?.roles;
+
+          if (roles && roles.length > 0) {
+            if (roles.length > 1) {
+              const filteredRoles = roles.filter(
+                (item) => item?.display === "Provider"
+              );
+              if (filteredRoles.length > 0) {
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/clinical-room-patient-queues`,
+                });
+                return;
+              }
+            } else {
+              const role = roles[0]?.display;
+              if (role === "Triage") {
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/triage-patient-queues`,
+                });
+              } else if (role === "Reception") {
+                navigate({
+                  to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
+                });
+              }
+              return;
+            }
+          }
         }
       });
-    } else if (!username && location.pathname === "/login/confirm") {
-      nav("/login", { state: location.state });
+    };
+
+    if (hasUserLocation || user) {
+      handleAuthenticatedUser();
+    } else if (!username && pathname === "/login/confirm") {
+      nav("/login", { state: location?.state });
     }
   }, [
     username,
