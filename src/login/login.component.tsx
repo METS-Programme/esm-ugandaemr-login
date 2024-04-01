@@ -44,60 +44,6 @@ const Login: React.FC<LoginReferrer> = () => {
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [hasUserLocation, setHasUserLocation] = useState(false);
-  useEffect(() => {
-    const { pathname } = location;
-
-    const handleAuthenticatedUser = () => {
-      clearCurrentUser();
-      refetchCurrentUser().then(() => {
-        const authenticated =
-          getSessionStore().getState().session.authenticated;
-
-        if (authenticated) {
-          const roles = getSessionStore().getState().session?.user?.roles;
-
-          if (roles && roles.length > 0) {
-            if (roles.length > 1) {
-              const filteredRoles = roles.filter(
-                (item) => item?.display === "Provider"
-              );
-              if (filteredRoles.length > 0) {
-                navigate({
-                  to: `${window.getOpenmrsSpaBase()}home/clinical-room-patient-queues`,
-                });
-                return;
-              }
-            } else {
-              const role = roles[0]?.display;
-              if (role === "Triage") {
-                navigate({
-                  to: `${window.getOpenmrsSpaBase()}home/triage-patient-queues`,
-                });
-              } else if (role === "Reception") {
-                navigate({
-                  to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
-                });
-              }
-              return;
-            }
-          }
-        }
-      });
-    };
-
-    if (hasUserLocation || user) {
-      handleAuthenticatedUser();
-    } else if (!username && pathname === "/login/confirm") {
-      nav("/login", { state: location?.state });
-    }
-  }, [
-    username,
-    nav,
-    location,
-    hasUserLocation,
-    config.links.loginSuccess,
-    user,
-  ]);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
@@ -159,6 +105,48 @@ const Login: React.FC<LoginReferrer> = () => {
     },
     [config.provider.attributeTypeUUID, password, username]
   );
+  const handleAuthenticatedUser = () => {
+    clearCurrentUser();
+    refetchCurrentUser().then(() => {
+      const authenticated =
+        getSessionStore().getState().session.authenticated;
+
+      if (authenticated) {
+        const roles = getSessionStore().getState().session?.user?.roles;
+        const roleName = roles[0]?.display;
+        if (roles && roles?.length > 0) {
+          if (
+            roles?.filter(
+              (item) => item?.display === "Organizational: Clinician"
+            ).length > 0
+          ) {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/clinical-room-patient-queues`,
+            });
+          } else if (roleName === "Triage") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/triage-patient-queues`,
+            });
+          } else if (roleName === "Reception") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
+            });
+          } else {
+            navigate({ to: `${window.getOpenmrsSpaBase()}home` });
+          }
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    const { pathname } = location;
+    if (hasUserLocation || user) {
+      handleAuthenticatedUser();
+    } else if (!username && pathname === "/login/confirm") {
+      nav("/login", { state: location?.state });
+    }
+  }, [username, nav, location, hasUserLocation, user]);
 
   if (config.provider.type === "basic") {
     return (
