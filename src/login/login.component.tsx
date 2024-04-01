@@ -8,7 +8,7 @@ import {
   TextInput,
   Tile,
 } from "@carbon/react";
-import { ArrowRight, IbmTelehealth } from "@carbon/react/icons";
+import { ArrowRight } from "@carbon/react/icons";
 import { useTranslation } from "react-i18next";
 import {
   clearCurrentUser,
@@ -108,8 +108,7 @@ const Login: React.FC<LoginReferrer> = () => {
   const handleAuthenticatedUser = () => {
     clearCurrentUser();
     refetchCurrentUser().then(() => {
-      const authenticated =
-        getSessionStore().getState().session.authenticated;
+      const authenticated = getSessionStore().getState().session.authenticated;
 
       if (authenticated) {
         const roles = getSessionStore().getState().session?.user?.roles;
