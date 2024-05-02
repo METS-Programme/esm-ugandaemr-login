@@ -130,6 +130,14 @@ const Login: React.FC<LoginReferrer> = () => {
             navigate({
               to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
             });
+          } else if (roleName === "Organizational: Laboratory") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/laboratory`,
+            });
+          } else if (roleName === "Organizational:Pharmacy") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}dispensing`,
+            });
           } else {
             navigate({ to: `${window.getOpenmrsSpaBase()}home` });
           }
