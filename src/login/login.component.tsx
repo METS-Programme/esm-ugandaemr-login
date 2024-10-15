@@ -23,6 +23,7 @@ import {
 import { getProvider, performLogin, useFacilityName } from "./login.resource";
 import Logo from "./logo.component";
 import styles from "./login.scss";
+import BackgroundWrapper from "./background.wrapper.component";
 
 export interface LoginReferrer {
   referrer?: string;
@@ -157,7 +158,7 @@ const Login: React.FC<LoginReferrer> = () => {
 
   if (config.provider.type === "basic") {
     return (
-      <div className={`canvas ${styles["container"]}`}>
+      <BackgroundWrapper>
         <div className={styles.section}>
           <div className={styles.logoContainer}>
             <Logo className={styles.logo} />
@@ -260,7 +261,7 @@ const Login: React.FC<LoginReferrer> = () => {
             </div>
           </div>
         </div>
-      </div>
+      </BackgroundWrapper>
     );
   }
   return null;

@@ -49,9 +49,10 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
-  loginBackgroundUrl: {
+  loginBackgroundImage: {
     src: {
       _type: Type.String,
+      _default: "/openmrs/spa/updf-logo.jpg",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],
@@ -62,9 +63,10 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
-  loginLogoUrl: {
+  loginLogoImage: {
     src: {
       _type: Type.String,
+      _default: "/openmrs/spa/updf-logo.jpg",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],

@@ -2,12 +2,12 @@ import React from "react";
 import { useConfig } from "@openmrs/esm-framework";
 
 const Logo = (props) => {
-  const { loginLogoUrl } = useConfig();
-  return loginLogoUrl.src ? (
+  const { loginLogoImage } = useConfig();
+  return loginLogoImage.src ? (
     <img
       {...props}
-      src={loginLogoUrl.src}
-      alt={loginLogoUrl.alt}
+      src={loginLogoImage.src}
+      alt={loginLogoImage.alt}
       title="UgandaEMR+ logo"
     />
   ) : (
