@@ -1,3 +1,4 @@
+import _default from "@carbon/react/lib/components/Button/Button";
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
@@ -52,7 +53,7 @@ export const configSchema = {
   loginBackgroundImage: {
     src: {
       _type: Type.String,
-      _default: "/openmrs/spa/updf-logo.jpg",
+      _default: "/openmrs/spa/background.png",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],

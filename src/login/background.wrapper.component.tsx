@@ -5,23 +5,27 @@ const BackgroundWrapper = ({ children }) => {
   const config = useConfig();
 
   return config?.loginBackgroundImage ? (
-    <div className={styles.backgroundContainer}>
+    <>
       <img
         src={config?.loginBackgroundImage?.src}
-        alt={config?.loginBackgroundImage?.alt}
+        alt={config?.loginBackgroundImage?.alt || "Background Image"}
         className={styles.backgroundImage}
       />
-      <div className={styles.contentOverlay}>{children}</div>
-    </div>
+      <div className={styles.backgroundContainer}>
+        <div className={styles.contentOverlay}>{children}</div>
+      </div>
+    </>
   ) : (
-    <div className={styles.backgroundContainer}>
+    <>
       <img
-        src={"/assets/background.png"}
-        alt={config?.loginBackgroundImage?.alt}
+        src="/openmrs/spa/background.png"
+        alt="Fallback Background"
         className={styles.backgroundImage}
       />
-      <div className={styles.contentOverlay}>{children}</div>
-    </div>
+      <div className={styles.backgroundContainer}>
+        <div className={styles.contentOverlay}>{children}</div>
+      </div>
+    </>
   );
 };
 
