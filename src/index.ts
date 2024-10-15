@@ -1,5 +1,5 @@
 import { getAsyncLifecycle, defineConfigSchema } from "@openmrs/esm-framework";
-import { configSchema } from "./config-schema";
+import {  configSchema } from "./config-schema";
 
 const moduleName = "@ugandaemr/esm-login-app";
 

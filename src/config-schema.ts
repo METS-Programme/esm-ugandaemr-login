@@ -49,4 +49,30 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
+  loginBackgroundUrl: {
+    src: {
+      _type: Type.String,
+      _description:
+        "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
+      _validators: [validators.isUrl],
+    },
+    alt: {
+      _type: Type.String,
+      _default: "Background",
+      _description: "Alt text, shown on hover",
+    },
+  },
+  loginLogoUrl: {
+    src: {
+      _type: Type.String,
+      _description:
+        "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
+      _validators: [validators.isUrl],
+    },
+    alt: {
+      _type: Type.String,
+      _default: "OpenMRS Logo",
+      _description: "Alt text, shown on hover",
+    },
+  },
 };
