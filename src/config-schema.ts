@@ -1,3 +1,4 @@
+import _default from "@carbon/react/lib/components/Button/Button";
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
@@ -46,6 +47,34 @@ export const configSchema = {
     alt: {
       _type: Type.String,
       _default: "Logo",
+      _description: "Alt text, shown on hover",
+    },
+  },
+  loginBackgroundImage: {
+    src: {
+      _type: Type.String,
+      _default: "/openmrs/spa/background.png",
+      _description:
+        "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
+      _validators: [validators.isUrl],
+    },
+    alt: {
+      _type: Type.String,
+      _default: "Background",
+      _description: "Alt text, shown on hover",
+    },
+  },
+  loginLogoImage: {
+    src: {
+      _type: Type.String,
+      _default: "/openmrs/spa/updf-logo.jpg",
+      _description:
+        "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
+      _validators: [validators.isUrl],
+    },
+    alt: {
+      _type: Type.String,
+      _default: "OpenMRS Logo",
       _description: "Alt text, shown on hover",
     },
   },

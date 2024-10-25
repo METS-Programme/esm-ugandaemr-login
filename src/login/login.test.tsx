@@ -34,11 +34,6 @@ jest.mock("./login.resource", () => ({
   performLogin: jest.fn(),
 }));
 
-const loginLocations = [
-  { uuid: "111", display: "Earth" },
-  { uuid: "222", display: "Mars" },
-];
-
 mockedUseSession.mockReturnValue({ authenticated: false });
 mockedUseConfig.mockReturnValue(mockConfig);
 
