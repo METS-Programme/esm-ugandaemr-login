@@ -32,12 +32,13 @@
 
 @media screen and (min-width: 1150px) {
     .backgroundContainer {
-        max-width: 80%;
+        max-width: 90%;
         justify-content: right;
     }
 
     .backgroundImage {
         object-fit: fit;
+        max-width: 55%;
         /* Fit image for larger screens */
     }
 }
