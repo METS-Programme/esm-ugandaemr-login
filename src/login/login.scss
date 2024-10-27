@@ -10,6 +10,7 @@
     width: 100%;
     position: relative;
     overflow: hidden;
+    max-width: 90%;
 }
 
 .backgroundImage {
@@ -20,6 +21,7 @@
     height: 100%;
     object-fit: cover;
     opacity: 1;
+    max-width: 55%;
 }
 
 .contentOverlay {
