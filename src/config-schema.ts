@@ -67,7 +67,7 @@ export const configSchema = {
   loginLogoImage: {
     src: {
       _type: Type.String,
-      _default: "/openmrs/spa/updf-logo.jpg",
+      _default: "/openmrs/spa/logo.svg",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],
