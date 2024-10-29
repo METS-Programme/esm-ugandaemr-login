@@ -4,11 +4,11 @@ import { useConfig } from "@openmrs/esm-framework";
 const BackgroundWrapper = ({ children }) => {
   const config = useConfig();
 
-  return config?.loginBackgroundImage ? (
+  return config?.loginBackground ? (
     <>
       <img
-        src={config?.loginBackgroundImage?.src}
-        alt={config?.loginBackgroundImage?.alt || "Background Image"}
+        src={config?.loginBackground?.src}
+        alt={config?.loginBackground?.alt || "Background Image"}
         className={styles.backgroundImage}
       />
       <div className={styles.backgroundContainer}>
