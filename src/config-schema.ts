@@ -39,7 +39,7 @@ export const configSchema = {
   logo: {
     src: {
       _type: Type.String,
-      _default: "${openmrsSpaBase}/home/patient-queues",
+      _default: "/openmrs/spa/logo.svg",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],
@@ -50,7 +50,7 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
-  loginBackgroundImage: {
+  loginBackground: {
     src: {
       _type: Type.String,
       _default: "/openmrs/spa/background.png",
@@ -64,10 +64,10 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
-  loginLogoImage: {
+  loginBanner: {
     src: {
       _type: Type.String,
-      _default: "/openmrs/spa/logo.svg",
+      _default: "/openmrs/spa/banner.png",
       _description:
         "A path or URL to an image. If null, will use the OpenMRS SVG sprite.",
       _validators: [validators.isUrl],
