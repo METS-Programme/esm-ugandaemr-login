@@ -75,7 +75,7 @@ const Login: React.FC<LoginReferrer> = () => {
                 if (providerResponse.status === 200) {
                   const userLocationUuid =
                     providerResponse?.data?.results[0]?.attributes.find(
-                      (provider: any) =>
+                      (provider) =>
                         provider.attributeType?.uuid ===
                         config.provider.attributeTypeUUID
                     )?.value?.uuid;
