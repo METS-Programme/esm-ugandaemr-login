@@ -1,4 +1,3 @@
-import _default from "@carbon/react/lib/components/Button/Button";
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
