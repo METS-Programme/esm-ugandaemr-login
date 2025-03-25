@@ -12,7 +12,6 @@ const Logout: React.FC = () => {
 
   return (
     <>
-      <SwitcherDivider className={styles.divider} />
       <Switcher aria-label="Switcher Container">
         <Button
           className={styles.logout}
