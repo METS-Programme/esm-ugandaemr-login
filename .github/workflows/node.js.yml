@@ -56,6 +56,8 @@ jobs:
           name: dist-${{ github.job }}-${{ github.run_id }}
           path: |
             dist
+          overwrite: true
+
 
 
   pre_release:
