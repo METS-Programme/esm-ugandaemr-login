@@ -77,4 +77,19 @@ export const configSchema = {
       _description: "Alt text, shown on hover",
     },
   },
+  showCenteredLogin: {
+    _type: Type.Boolean,
+    _description: "Whether to show the login screen centered.",
+    _default: false,
+  },
+  supportEmail: {
+    _type: Type.String,
+    _default: "emrtalk@musph.ac.ug",
+    _description: "Support email for the system",
+  },
+  footerOpenMRSLogo: {
+    _type: Type.String,
+    _default: "omrs-logo-partial-mono",
+    _description: "Choice of powered by OpenMRS logo to render",
+  },
 };

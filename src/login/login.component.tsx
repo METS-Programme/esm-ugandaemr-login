@@ -237,26 +237,32 @@ const Login: React.FC<LoginReferrer> = () => {
               <span className={styles.link}>
                 © {new Date().getFullYear()} All rights reserved
               </span>
-              <span className={styles.link}>
-                <a href="http://www.health.go.ug/">
-                  Ministry of Health - Republic of Uganda
-                </a>
-              </span>
+              {!config?.showCenteredLogin ? (
+                <span className={styles.link}>
+                  <a href="http://www.health.go.ug/">
+                    Ministry of Health - Republic of Uganda
+                  </a>
+                </span>
+              ) : null}
             </div>
             <span className={styles.link}>
               Need help? Contact us at{" "}
-              <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
+              <a href={`mailto:${config?.supportEmail}`}>
+                {config?.supportEmail}
+              </a>{" "}
               support
             </span>
-            <span className={styles.link}>
-              Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
-            </span>
+            {!config?.showCenteredLogin ? (
+              <span className={styles.link}>
+                Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
+              </span>
+            ) : null}
             <div className={styles.attribution}>
-              <span className={styles["powered-by-txt"]}>
+              <span className={styles.poweredByTxt}>
                 {t("poweredBy", "Powered by")}
               </span>
-              <svg role="img" className={styles["powered-by-logo"]}>
-                <use xlinkHref="#omrs-logo-partial-mono"></use>
+              <svg className={styles["powered-by-logo"]}>
+                <use xlinkHref={`#${config?.footerOpenMRSLogo}`}></use>
               </svg>
             </div>
           </div>
