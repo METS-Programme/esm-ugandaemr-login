@@ -140,7 +140,7 @@ const Login: React.FC<LoginReferrer> = () => {
               to: `${window.getOpenmrsSpaBase()}dispensing`,
             });
           } else {
-            navigate({ to: `${window.getOpenmrsSpaBase()}home` });
+            navigate({ to: `${window.getOpenmrsSpaBase()}home/initial-page` });
           }
         }
       }
