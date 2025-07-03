@@ -131,7 +131,7 @@ const Login: React.FC<LoginReferrer> = () => {
               to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
             });
           } else {
-            navigate({ to: `${window.getOpenmrsSpaBase()}home` });
+            navigate({ to: `${window.getOpenmrsSpaBase()}home/initial-page` });
           }
         }
       }
