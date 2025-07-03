@@ -23,6 +23,7 @@ import {
 import { getProvider, performLogin, useFacilityName } from "./login.resource";
 import Logo from "./logo.component";
 import styles from "./login.scss";
+import BackgroundWrapper from "./background.wrapper.component";
 
 export interface LoginReferrer {
   referrer?: string;
@@ -74,7 +75,7 @@ const Login: React.FC<LoginReferrer> = () => {
                 if (providerResponse.status === 200) {
                   const userLocationUuid =
                     providerResponse?.data?.results[0]?.attributes.find(
-                      (provider: any) =>
+                      (provider) =>
                         provider.attributeType?.uuid ===
                         config.provider.attributeTypeUUID
                     )?.value?.uuid;
@@ -130,6 +131,14 @@ const Login: React.FC<LoginReferrer> = () => {
             navigate({
               to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
             });
+          } else if (roleName === "Organizational: Laboratory") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/laboratory`,
+            });
+          } else if (roleName === "Organizational:Pharmacy") {
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}dispensing`,
+            });
           } else {
             navigate({ to: `${window.getOpenmrsSpaBase()}home/initial-page` });
           }
@@ -149,7 +158,7 @@ const Login: React.FC<LoginReferrer> = () => {
 
   if (config.provider.type === "basic") {
     return (
-      <div className={`canvas ${styles["container"]}`}>
+      <BackgroundWrapper>
         <div className={styles.section}>
           <div className={styles.logoContainer}>
             <Logo className={styles.logo} />
@@ -228,34 +237,39 @@ const Login: React.FC<LoginReferrer> = () => {
               <span className={styles.link}>
                 © {new Date().getFullYear()} All rights reserved
               </span>
-              <span className={styles.link}>
-                <a href="http://www.health.go.ug/">
-                  Ministry of Health - Republic of Uganda
-                </a>
-              </span>
+              {!config?.showCenteredLogin ? (
+                <span className={styles.link}>
+                  <a href="http://www.health.go.ug/">
+                    Ministry of Health - Republic of Uganda
+                  </a>
+                </span>
+              ) : null}
             </div>
             <span className={styles.link}>
               Need help? Contact us at{" "}
-              <a href="mailto:emrtalk@musph.ac.ug">emrtalk@musph.ac.ug</a> for
+              <a href={`mailto:${config?.supportEmail}`}>
+                {config?.supportEmail}
+              </a>{" "}
               support
             </span>
-            <span className={styles.link}>
-              Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
-            </span>
+            {!config?.showCenteredLogin ? (
+              <span className={styles.link}>
+                Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
+              </span>
+            ) : null}
             <div className={styles.attribution}>
-              <span className={styles["powered-by-txt"]}>
+              <span className={styles.poweredByTxt}>
                 {t("poweredBy", "Powered by")}
               </span>
-              <svg role="img" className={styles["powered-by-logo"]}>
-                <use xlinkHref="#omrs-logo-partial-mono"></use>
+              <svg className={styles["powered-by-logo"]}>
+                <use xlinkHref={`#${config?.footerOpenMRSLogo}`}></use>
               </svg>
             </div>
           </div>
         </div>
-      </div>
+      </BackgroundWrapper>
     );
   }
-
   return null;
 };
 
