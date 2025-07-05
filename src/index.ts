@@ -1,5 +1,10 @@
-import { getAsyncLifecycle, defineConfigSchema } from "@openmrs/esm-framework";
+import {
+  getAsyncLifecycle,
+  defineConfigSchema,
+  getSyncLifecycle,
+} from "@openmrs/esm-framework";
 import { configSchema } from "./config-schema";
+import changePasswordLinkComponent from "./change-password/change-password-link.extension";
 
 const moduleName = "@ugandaemr/esm-login-app";
 
@@ -26,5 +31,14 @@ export const root = getAsyncLifecycle(
 
 export const logoutButton = getAsyncLifecycle(
   () => import("./logout/logout.component"),
+  options
+);
+
+export const changePasswordLink = getSyncLifecycle(
+  changePasswordLinkComponent,
+  options
+);
+export const changePasswordModal = getAsyncLifecycle(
+  () => import("./change-password/change-password.modal"),
   options
 );
