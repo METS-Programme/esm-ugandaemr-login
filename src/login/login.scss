@@ -1,6 +1,7 @@
 @use "@carbon/colors";
-@use "@carbon/styles/scss/type";
-@import "../root.scss";
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
 
 .backgroundContainer, .centeredLoginBackgroundContainer {
     display: flex;
@@ -120,7 +121,7 @@
 }
 
 .poweredByTxt {
-    @extend .caption01;
+    @extend .caption01 !optional;
     text-align: center;
     color: $color-gray-70;
     color: $text-02;
@@ -132,7 +133,7 @@
 }
 
 .need-help-txt {
-    @extend .bodyShort01;
+    @extend .bodyShort01 !optional;
     text-align: left;
     color: $text-02;
     display: flex;
@@ -170,7 +171,7 @@
 
     :global(.cds--text-input) {
         height: 3rem;
-        @extend .label01;
+        @extend .label01 !optional;
     }
 
     :global(.cds--text-input__field-outer-wrapper) {
