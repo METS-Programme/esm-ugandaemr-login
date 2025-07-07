@@ -20,7 +20,7 @@
   "extensions": [
     {
       "name": "logout-button",
-      "slot": "user-panel-actions-slot",
+      "slot": "user-panel-bottom-slot",
       "component": "logoutButton",
       "online": true,
       "offline": true
