@@ -1,8 +1,10 @@
-@import "../root.scss";
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
 
 .logout {
   padding-right: 0rem;
   @include brand-02(background-color);
-  @extend .productiveHeading01;
+  @extend .productiveHeading01 !optional;
   width: 16rem;
 }
