@@ -73,13 +73,13 @@ export interface Attributes {
   display: string;
   uuid: string;
   attributeType: AttributeType;
-  value: Value;
+  value: RoomsResponse;
   voided: boolean;
   links: Links[];
   resourceVersion: string;
 }
 
-export interface Value {
+export interface RoomsResponse {
   uuid: string;
   display: string;
   name: string;

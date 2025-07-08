@@ -5,6 +5,7 @@ import {
 } from "@openmrs/esm-framework";
 import { configSchema } from "./config-schema";
 import changePasswordLinkComponent from "./change-password/change-password-link.extension";
+import changeLocationLinkComponent from "./change-location/change-location-link.extension";
 
 const moduleName = "@ugandaemr/esm-login-app";
 
@@ -40,5 +41,15 @@ export const changePasswordLink = getSyncLifecycle(
 );
 export const changePasswordModal = getAsyncLifecycle(
   () => import("./change-password/change-password.modal"),
+  options
+);
+
+export const changeLocationLink = getSyncLifecycle(
+  changeLocationLinkComponent,
+  options
+);
+
+export const changeLocationModal = getAsyncLifecycle(
+  () => import("./change-location/change-location-modal"),
   options
 );

@@ -1,17 +1,32 @@
 @use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
 
-.changeLocationButton {
-  width: fit-content;
-  background-color: transparent;
-  color: white;
-  font-size: 14px;
-  padding: layout.$spacing-04 !important; // this gets unset in rtl language without !important
+.submitButton {
+  margin-top: layout.$spacing-06;
+  width: 18rem;
 
-  &:hover {
-    color: white;
+  :global(.cds--inline-loading) {
+    min-height: layout.$spacing-05;
+  }
+
+  :global(.cds--inline-loading__text) {
+    font-size: unset;
   }
 }
 
-.currentLocationText {
-  padding-inline-start: layout.$spacing-03;
+.alignCenter {
+  display: flex;
+  text-align: center;
 }
+
+.panelItemContainer {
+  a {
+    @extend .alignCenter !optional;
+    justify-content: space-between;
+  }
+
+  div {
+    @extend .alignCenter !optional;
+  }
+}
+
