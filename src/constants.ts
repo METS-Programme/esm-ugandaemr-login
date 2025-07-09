@@ -1,0 +1,1 @@
+export const FACILITY_LOCATION_UUID = '629d78e9-93e5-43b0-ad8a-48313fd99117';

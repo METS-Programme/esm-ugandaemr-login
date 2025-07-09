@@ -2,6 +2,12 @@
 @use '@carbon/styles/scss/type';
 @use '@openmrs/esm-styleguide/src/vars' as *;
 
+.switch {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .container {
     display: flex;
     flex-direction: column;
