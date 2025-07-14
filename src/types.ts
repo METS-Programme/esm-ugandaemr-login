@@ -107,7 +107,7 @@ export interface RoomsResponse {
 export interface ParentLocation {
   uuid: string;
   display: string;
-    parentLocation: ParentLocation;
+  parentLocation: ParentLocation;
   childLocations: ChildLocations[];
   links: Links[];
 }
@@ -117,7 +117,6 @@ export interface ChildLocations {
   display: string;
   links: Links[];
 }
-
 
 export interface Tags {
   uuid: string;

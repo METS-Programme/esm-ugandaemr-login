@@ -30,7 +30,10 @@ import {
   saveProvider,
   useRoomLocations,
 } from "./change-location.resource";
-import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID, locationChangerList } from "../constants";
+import {
+  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
+  locationChangerList,
+} from "../constants";
 import { LocationOption } from "../types";
 
 type ChangeLocationProps = DefaultWorkspaceProps;
@@ -47,14 +50,17 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
     id: item.id,
     label: item.label,
   }));
-  const [selectedLocationOption, setSelectedLocationOption] = useState<LocationOption | undefined>();
+  const [selectedLocationOption, setSelectedLocationOption] = useState<
+    LocationOption | undefined
+  >();
   const [isChangingRoom, setIsChangingRoom] = useState(false);
   const [selectedClinicRoom, setselectedClinicRoom] = useState<
     string | undefined
   >();
   const [selectedClinic, setSelectedClinic] = useState<string | undefined>();
-  const { roomLocations, error: errorFetchingRooms } =
-    useRoomLocations(sessionUser?.sessionLocation?.uuid);
+  const { roomLocations, error: errorFetchingRooms } = useRoomLocations(
+    sessionUser?.sessionLocation?.uuid
+  );
 
   const changeLocationSchema = z.object({
     clinicRoom: z.string().min(1, "Room is required"),
@@ -68,73 +74,75 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
     resolver: zodResolver(changeLocationSchema),
   });
 
-const onSubmit: SubmitHandler<z.infer<typeof changeLocationSchema>> = useCallback(
-  (data) => {
-    setIsChangingRoom(true);
+  const onSubmit: SubmitHandler<z.infer<typeof changeLocationSchema>> =
+    useCallback(
+      (data) => {
+        setIsChangingRoom(true);
 
-    const userUuid = sessionUser?.user?.uuid;
-    const roomUuid = data.clinicRoom;
+        const userUuid = sessionUser?.user?.uuid;
+        const roomUuid = data.clinicRoom;
 
-    if (!userUuid || !roomUuid) return;
+        if (!userUuid || !roomUuid) return;
 
-getProvider(userUuid)
-  .then((response) => {
-    const provider = response?.data?.results?.[0];
-    const providerUuid = provider?.uuid;
+        getProvider(userUuid)
+          .then((response) => {
+            const provider = response?.data?.results?.[0];
+            const providerUuid = provider?.uuid;
 
-    if (!providerUuid) throw new Error("Provider not found");
+            if (!providerUuid) throw new Error("Provider not found");
 
-    // find the existing location attribute (if any)
-    const existingLocationAttr = provider.attributes?.find(
-      (attr) => attr.attributeType?.uuid === DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
+            const existingLocationAttr = provider.attributes?.find(
+              (attr) =>
+                attr.attributeType?.uuid ===
+                DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
+            );
+
+            const otherAttributes =
+              provider.attributes?.filter(
+                (attr) =>
+                  attr.attributeType?.uuid !==
+                  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
+              ) ?? [];
+
+            const updatedAttributes = [
+              ...otherAttributes,
+              {
+                ...(existingLocationAttr?.uuid && {
+                  uuid: existingLocationAttr.uuid,
+                }),
+                attributeType: { uuid: DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID },
+                value: roomUuid,
+              },
+            ];
+
+            return saveProvider(providerUuid, updatedAttributes);
+          })
+          .then(() => {
+            close();
+            showSnackbar({
+              title: t(
+                "locationChangedSuccessfully",
+                "Location changed successfully"
+              ),
+              kind: "success",
+            });
+          })
+          .catch((error) => {
+            const errorMessage = error?.responseBody?.message ?? error?.message;
+            showSnackbar({
+              title: t("locationChangeFailed", "Location change failed"),
+              subtitle: errorMessage,
+              kind: "error",
+            });
+          })
+          .finally(() => {
+            setIsChangingRoom(false);
+          });
+      },
+      [sessionUser?.user?.uuid, close, t]
     );
 
-    // keep all other attributes
-    const otherAttributes = provider.attributes?.filter(
-      (attr) => attr.attributeType?.uuid !== DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
-    ) ?? [];
-
-    // include the updated one with its UUID (if it exists)
-    const updatedAttributes = [
-  ...otherAttributes,
-  {
-    ...(existingLocationAttr?.uuid && { uuid: existingLocationAttr.uuid }),
-    attributeType: { uuid: DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID },
-    value: roomUuid, // ✅ plain string
-  }
-];
-
-
-
-
-    return saveProvider(providerUuid, updatedAttributes);
-  })
-  .then(() => {
-    close();
-    showSnackbar({
-      title: t("locationChangedSuccessfully", "Location changed successfully"),
-      kind: "success",
-    });
-  })
-  .catch((error) => {
-    const errorMessage = error?.responseBody?.message ?? error?.message;
-    showSnackbar({
-      title: t("locationChangeFailed", "Location change failed"),
-      subtitle: errorMessage,
-      kind: "error",
-    });
-  })
-  .finally(() => {
-    setIsChangingRoom(false);
-  });
-  },
-  [sessionUser?.user?.uuid, close, t]
-);
-
-
-
-const onError = () => setIsChangingRoom(false);
-
+  const onError = () => setIsChangingRoom(false);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -160,71 +168,73 @@ const onError = () => setIsChangingRoom(false);
               }
             />
             {selectedLocationOption?.id === "switchRoom" && (
-            <Controller
-              name="clinicRoom"
-              control={control}
-              defaultValue={currentLocation}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  id="clinicRoom"
-                  name="clinicRoom"
-                  labelText="Select room to change to"
-                  disabled={errorFetchingRooms}
-                  invalidText={errors.locationTo?.message}
-                  value={field.value}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    field.onChange(selectedValue);
-                    setselectedClinicRoom(selectedValue);
-                  }}
-                >
-                  {!field.value && (
-                    <SelectItem
-                      value=""
-                      text={t("selectRoom", "Choose room")}
-                    />
-                  )}
+              <Controller
+                name="clinicRoom"
+                control={control}
+                defaultValue={currentLocation}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    id="clinicRoom"
+                    name="clinicRoom"
+                    labelText="Select room to change to"
+                    disabled={errorFetchingRooms}
+                    invalidText={errors.locationTo?.message}
+                    value={field.value}
+                    onChange={(e) => {
+                      const selectedValue = e.target.value;
+                      field.onChange(selectedValue);
+                      setselectedClinicRoom(selectedValue);
+                    }}
+                  >
+                    {!field.value && (
+                      <SelectItem
+                        value=""
+                        text={t("selectRoom", "Choose room")}
+                      />
+                    )}
 
-                  {roomLocations.map(({ uuid, display }) => (
-                    <SelectItem key={uuid} value={uuid} text={display} />
-                  ))}
-                </Select>
-              )}
-            />)}
+                    {roomLocations.map(({ uuid, display }) => (
+                      <SelectItem key={uuid} value={uuid} text={display} />
+                    ))}
+                  </Select>
+                )}
+              />
+            )}
             {selectedLocationOption?.id === "" && (
-            <Controller
-              name="clinicLocation"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  id="clinicLocation"
-                  name="clinicLocation"
-                  labelText="Select clinic"
-                  // disabled={errorFetchingClinics}
-                  invalidText={errors.root?.message}
-                  value={field.value}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    field.onChange(selectedValue);
-                    setSelectedClinic(selectedValue);
-                  }}
-                >
-                  {!field.value && (
-                    <SelectItem
-                      value=""
-                      text={t("selectClinic", "Choose clinic")}
-                    />
-                  )}
+              <Controller
+                name="clinicLocation"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    id="clinicLocation"
+                    name="clinicLocation"
+                    labelText="Select clinic"
+                    // disabled={errorFetchingClinics}
+                    invalidText={errors.root?.message}
+                    value={field.value}
+                    onChange={(e) => {
+                      const selectedValue = e.target.value;
+                      field.onChange(selectedValue);
+                      setSelectedClinic(selectedValue);
+                    }}
+                  >
+                    {!field.value && (
+                      <SelectItem
+                        value=""
+                        text={t("selectClinic", "Choose clinic")}
+                      />
+                    )}
 
-                  {/* {clinicsList.map(({ uuid, display }) => (
+                    {/* {clinicsList.map(({ uuid, display }) => (
                     <SelectItem key={uuid} value={uuid} text={display} />
                   ))} */}
-                </Select>
-              )}
-            />)}
+                  </Select>
+                )}
+              />
+            )}
 
             {errorFetchingRooms && (
               <InlineNotification

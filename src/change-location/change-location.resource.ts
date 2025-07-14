@@ -2,7 +2,10 @@ import { restBaseUrl, openmrsFetch } from "@openmrs/esm-framework";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { RoomsResponse } from "../types";
-import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID, FACILITY_LOCATION_UUID } from "../constants";
+import {
+  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
+  FACILITY_LOCATION_UUID,
+} from "../constants";
 
 export interface Provider {
   uuid?: string;
@@ -40,7 +43,9 @@ export function useRoomLocations(currentQueueLocation?: string) {
   );
 
   const clinicRoomLocations = useMemo(
-    () => data?.data?.parentLocation?.childLocations?.map((response) => response) ?? [],
+    () =>
+      data?.data?.parentLocation?.childLocations?.map((response) => response) ??
+      [],
     [data?.data?.childLocations]
   );
   return {
@@ -59,9 +64,9 @@ export function getProvider(provider: string) {
   const abortController = new AbortController();
 
   return openmrsFetch(`${restBaseUrl}/provider?user=${provider}&v=full`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     signal: abortController.signal,
   });
