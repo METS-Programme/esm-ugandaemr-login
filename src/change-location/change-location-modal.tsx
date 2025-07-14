@@ -14,11 +14,7 @@ import {
   InlineNotification,
   InlineLoading,
 } from "@carbon/react";
-import {
-  DefaultWorkspaceProps,
-  useLayoutType,
-  useSession,
-} from "@openmrs/esm-framework";
+import { useLayoutType, useSession } from "@openmrs/esm-framework";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import styles from "./change-location-link.scss";
 import { useTranslation } from "react-i18next";
@@ -26,8 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import {
   getProvider,
-  Provider,
-  saveProvider,
+  saveProviderAttributeType,
   useRoomLocations,
 } from "./change-location.resource";
 import {
@@ -36,11 +31,11 @@ import {
 } from "../constants";
 import { LocationOption } from "../types";
 
-type ChangeLocationProps = DefaultWorkspaceProps;
+interface ChangeLocationProps {
+  close(): () => void;
+}
 
-const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
-  closeWorkspace,
-}) => {
+const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === "tablet";
   const session = useSession();
@@ -58,6 +53,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
     string | undefined
   >();
   const [selectedClinic, setSelectedClinic] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState(null);
   const { roomLocations, error: errorFetchingRooms } = useRoomLocations(
     sessionUser?.sessionLocation?.uuid
   );
@@ -80,7 +76,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
         setIsChangingRoom(true);
 
         const userUuid = sessionUser?.user?.uuid;
-        const roomUuid = data.clinicRoom;
+        const roomUuid = data?.clinicRoom;
 
         if (!userUuid || !roomUuid) return;
 
@@ -91,31 +87,19 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
 
             if (!providerUuid) throw new Error("Provider not found");
 
-            const existingLocationAttr = provider.attributes?.find(
+            const existingLocationAttribute = provider?.attributes?.find(
               (attr) =>
-                attr.attributeType?.uuid ===
+                attr?.attributeType?.uuid ===
                 DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
             );
 
-            const otherAttributes =
-              provider.attributes?.filter(
-                (attr) =>
-                  attr.attributeType?.uuid !==
-                  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
-              ) ?? [];
+            const attributeUuid = existingLocationAttribute?.uuid ?? null;
 
-            const updatedAttributes = [
-              ...otherAttributes,
-              {
-                ...(existingLocationAttr?.uuid && {
-                  uuid: existingLocationAttr.uuid,
-                }),
-                attributeType: { uuid: DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID },
-                value: roomUuid,
-              },
-            ];
-
-            return saveProvider(providerUuid, updatedAttributes);
+            return saveProviderAttributeType(
+              providerUuid,
+              attributeUuid,
+              roomUuid
+            );
           })
           .then(() => {
             close();
@@ -129,11 +113,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
           })
           .catch((error) => {
             const errorMessage = error?.responseBody?.message ?? error?.message;
-            showSnackbar({
-              title: t("locationChangeFailed", "Location change failed"),
-              subtitle: errorMessage,
-              kind: "error",
-            });
+            setErrorMessage(errorMessage);
           })
           .finally(() => {
             setIsChangingRoom(false);
@@ -245,7 +225,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
                   "Error fetching queue rooms"
                 )}
                 subtitle={errorFetchingRooms}
-                onClick={() => {}}
+                onClick={() => setErrorMessage("")}
               />
             )}
           </ResponsiveWrapper>

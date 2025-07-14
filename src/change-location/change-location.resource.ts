@@ -2,10 +2,7 @@ import { restBaseUrl, openmrsFetch } from "@openmrs/esm-framework";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { RoomsResponse } from "../types";
-import {
-  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
-  FACILITY_LOCATION_UUID,
-} from "../constants";
+import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID } from "../constants";
 
 export interface Provider {
   uuid?: string;
@@ -46,7 +43,7 @@ export function useRoomLocations(currentQueueLocation?: string) {
     () =>
       data?.data?.parentLocation?.childLocations?.map((response) => response) ??
       [],
-    [data?.data?.childLocations]
+    [data?.data?.parentLocation?.childLocations]
   );
   return {
     roomLocations: clinicRoomLocations.filter(
@@ -72,20 +69,31 @@ export function getProvider(provider: string) {
   });
 }
 
-export async function saveProvider(providerUuid: string, attributes: any[]) {
+export async function saveProviderAttributeType(
+  providerUuid: string,
+  attributeUuid: string | null,
+  value: string
+) {
   const abortController = new AbortController();
-  const isUpdating = !!providerUuid;
 
-  const url = isUpdating
-    ? `${restBaseUrl}/provider/${providerUuid}`
-    : `${restBaseUrl}/provider`;
+  const url = attributeUuid
+    ? `${restBaseUrl}/provider/${providerUuid}/attribute/${attributeUuid}`
+    : `${restBaseUrl}/provider/${providerUuid}/attribute`;
+
+  const payload = attributeUuid
+    ? { value }
+    : {
+        attributeType: DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
+        value,
+      };
 
   return await openmrsFetch(url, {
     method: "POST",
     signal: abortController.signal,
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
-    body: JSON.stringify({ attributes }),
+    body: JSON.stringify(payload),
   });
 }
