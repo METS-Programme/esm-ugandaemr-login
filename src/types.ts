@@ -79,40 +79,37 @@ export interface Attributes {
   resourceVersion: string;
 }
 
+export interface AttributeType {
+  uuid: string;
+  display: string;
+  value: Value;
+  links: Links[];
+}
+
+export interface Value {
+  uuid: string;
+  display: string;
+}
+
 export interface RoomsResponse {
   uuid: string;
   display: string;
   name: string;
   description: string;
-  address1: string;
-  address2: string;
-  cityVillage: string;
-  stateProvince: string;
-  country: string;
-  postalCode: string;
-  latitude: string;
-  longitude: string;
-  countyDistrict: string;
-  address3: string;
-  address4: string;
-  address5: string;
-  address6: string;
   tags: Tags[];
   parentLocation: ParentLocation;
-  childLocations: ChildLocations[];
+  childLocations: String[];
   retired: boolean;
   attributes: string[];
-  address7: string;
-  address8: string;
-  address9: string;
-  address10: string;
-  address11: string;
-  address12: string;
-  address13: string;
-  address14: string;
-  address15: string;
   links: Links[];
-  resourceVersion: string;
+}
+
+export interface ParentLocation {
+  uuid: string;
+  display: string;
+    parentLocation: ParentLocation;
+  childLocations: ChildLocations[];
+  links: Links[];
 }
 
 export interface ChildLocations {
@@ -121,19 +118,8 @@ export interface ChildLocations {
   links: Links[];
 }
 
-export interface ParentLocation {
-  uuid: string;
-  display: string;
-  links: Links[];
-}
 
 export interface Tags {
-  uuid: string;
-  display: string;
-  links: Links[];
-}
-
-export interface AttributeType {
   uuid: string;
   display: string;
   links: Links[];
@@ -223,4 +209,9 @@ export interface Person {
 
 export interface UserProperties {
   loginAttempts: string;
+}
+
+export interface LocationOption {
+  id: string;
+  label: string;
 }

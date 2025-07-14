@@ -2,7 +2,7 @@ import { restBaseUrl, openmrsFetch } from "@openmrs/esm-framework";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { RoomsResponse } from "../types";
-import { FACILITY_LOCATION_UUID } from "../constants";
+import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID, FACILITY_LOCATION_UUID } from "../constants";
 
 export interface Provider {
   uuid?: string;
@@ -15,9 +15,9 @@ export interface Provider {
 
 export interface Attributes {
   display?: string;
-    uuid?: string;
-    attributeType: AttributeType;
-    value: Value;
+  uuid?: string;
+  attributeType: AttributeType;
+  value: Value;
 }
 
 export interface AttributeType {
@@ -30,15 +30,17 @@ export interface Value {
   display: string;
 }
 
-export function useRoomLocations(clinicUuid?: string) {
-  const apiUrl = clinicUuid ? `${restBaseUrl}/location/${clinicUuid}?v=full` : null;
+export function useRoomLocations(currentQueueLocation?: string) {
+  const apiUrl = currentQueueLocation
+    ? `${restBaseUrl}/location/${currentQueueLocation}?v=full`
+    : null;
   const { data, error, isLoading, mutate } = useSWR<{ data: RoomsResponse }>(
     apiUrl,
     openmrsFetch
   );
 
   const clinicRoomLocations = useMemo(
-    () => data?.data?.childLocations?.map((response) => response) ?? [],
+    () => data?.data?.parentLocation?.childLocations?.map((response) => response) ?? [],
     [data?.data?.childLocations]
   );
   return {
@@ -53,35 +55,24 @@ export function useRoomLocations(clinicUuid?: string) {
   };
 }
 
-export function useClinicLocations() {
-  const apiUrl = `${restBaseUrl}/location/${FACILITY_LOCATION_UUID}?v=full`;
-  const { data, error, isLoading, mutate } = useSWR<{ data: RoomsResponse }>(
-    apiUrl,
-    openmrsFetch
-  );
+export function getProvider(provider: string) {
+  const abortController = new AbortController();
 
-  const clinicLocations = useMemo(
-    () => data?.data?.childLocations?.map((response) => response) ?? [],
-    [data?.data?.childLocations]
-  );
-  return {
-    clinicsList: clinicLocations.filter(
-      (location) => location?.uuid != null
-    )
-      ? clinicLocations
-      : [],
-    isLoading,
-    error,
-    mutate,
-  };
+  return openmrsFetch(`${restBaseUrl}/provider?user=${provider}&v=full`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    signal: abortController.signal,
+  });
 }
 
-export async function saveProvider(payload: Provider) {
+export async function saveProvider(providerUuid: string, attributes: any[]) {
   const abortController = new AbortController();
-  const isUpdating = !!payload.uuid;
+  const isUpdating = !!providerUuid;
 
   const url = isUpdating
-    ? `${restBaseUrl}/provider/${payload.uuid}`
+    ? `${restBaseUrl}/provider/${providerUuid}`
     : `${restBaseUrl}/provider`;
 
   return await openmrsFetch(url, {
@@ -90,12 +81,6 @@ export async function saveProvider(payload: Provider) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: {
-      person: payload.person.uuid,
-      attributes: payload.attributes?.map(attr => ({
-  attributeType: typeof attr.attributeType === 'string' ? attr.attributeType : attr.attributeType.uuid,
-  value: typeof attr.value === 'string' ? attr.value : attr.value.uuid
-}))
-    },
+    body: JSON.stringify({ attributes }),
   });
 }

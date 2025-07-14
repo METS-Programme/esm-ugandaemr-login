@@ -1,24 +1,21 @@
 import React, { useCallback, useState } from "react";
 import {
   Button,
-  ContentSwitcher,
+  Dropdown,
   Form,
-  Hospital,
   Layer,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Select,
   SelectItem,
+  showSnackbar,
   Stack,
-  Switch,
-  TaskLocation,
   InlineNotification,
   InlineLoading,
 } from "@carbon/react";
 import {
   DefaultWorkspaceProps,
-  showSnackbar,
   useLayoutType,
   useSession,
 } from "@openmrs/esm-framework";
@@ -27,7 +24,14 @@ import styles from "./change-location-link.scss";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { Provider, saveProvider, useClinicLocations, useRoomLocations } from "./change-location.resource";
+import {
+  getProvider,
+  Provider,
+  saveProvider,
+  useRoomLocations,
+} from "./change-location.resource";
+import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID, locationChangerList } from "../constants";
+import { LocationOption } from "../types";
 
 type ChangeLocationProps = DefaultWorkspaceProps;
 
@@ -36,21 +40,24 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
 }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === "tablet";
-  const [tabType, setTabType] = useState("Change room");
   const session = useSession();
+  const sessionUser = useSession();
   const currentLocation = session?.sessionLocation?.uuid;
+  const locationList = locationChangerList.map((item) => ({
+    id: item.id,
+    label: item.label,
+  }));
+  const [selectedLocationOption, setSelectedLocationOption] = useState<LocationOption | undefined>();
   const [isChangingRoom, setIsChangingRoom] = useState(false);
-  const [selectedClinicRoom, setselectedClinicRoom] = useState<string | undefined>();
+  const [selectedClinicRoom, setselectedClinicRoom] = useState<
+    string | undefined
+  >();
   const [selectedClinic, setSelectedClinic] = useState<string | undefined>();
-  const { roomLocations, error: errorFetchingRooms } = useRoomLocations(selectedClinic);
-  const {clinicsList, error: errorFetchingClinics} = useClinicLocations();
-
-  const handleTabTypeChange = ({ name }) => {
-    setTabType(name);
-  };
+  const { roomLocations, error: errorFetchingRooms } =
+    useRoomLocations(sessionUser?.sessionLocation?.uuid);
 
   const changeLocationSchema = z.object({
-    clinicRoom: z.string().optional(),
+    clinicRoom: z.string().min(1, "Room is required"),
   });
 
   const {
@@ -61,104 +68,99 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({
     resolver: zodResolver(changeLocationSchema),
   });
 
-const onSubmit: SubmitHandler<any> = useCallback(
+const onSubmit: SubmitHandler<z.infer<typeof changeLocationSchema>> = useCallback(
   (data) => {
     setIsChangingRoom(true);
 
-    const newLocationUuid = data.clinicRoom ?? data.clinic;
-    const providerUuid = session?.currentProvider?.uuid;
-    const personUuid = session?.user?.person?.uuid;
+    const userUuid = sessionUser?.user?.uuid;
+    const roomUuid = data.clinicRoom;
 
-    const payload: Provider = {
-      uuid: providerUuid,
-      person: { uuid: personUuid },
-      attributes: [
-        {
-          attributeType: {
-            uuid: "13a721e4-68e5-4f7a-8aee-3cbcec127179",
-            display: "Default Location",
-          },
-          value: {
-            uuid: newLocationUuid,
-            display: roomLocations.find(loc => loc.uuid === newLocationUuid)?.display || "Selected Location"
-          }
-        }
-      ],
-    };
+    if (!userUuid || !roomUuid) return;
 
-    saveProvider(payload)
-      .then(() => {
-        closeWorkspace();
-        showSnackbar({
-          title: t("locationChanged", "Default location updated"),
-          kind: "success",
-        });
-      })
-      .catch((error) => {
-        const errorMessage =
-          error?.responseBody?.message || error?.message || "An unexpected error occurred";
-        console.error("Provider update failed:", errorMessage);
-      })
-      .finally(() => {
-        setIsChangingRoom(false);
-      });
+getProvider(userUuid)
+  .then((response) => {
+    const provider = response?.data?.results?.[0];
+    const providerUuid = provider?.uuid;
+
+    if (!providerUuid) throw new Error("Provider not found");
+
+    // find the existing location attribute (if any)
+    const existingLocationAttr = provider.attributes?.find(
+      (attr) => attr.attributeType?.uuid === DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
+    );
+
+    // keep all other attributes
+    const otherAttributes = provider.attributes?.filter(
+      (attr) => attr.attributeType?.uuid !== DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID
+    ) ?? [];
+
+    // include the updated one with its UUID (if it exists)
+    const updatedAttributes = [
+  ...otherAttributes,
+  {
+    ...(existingLocationAttr?.uuid && { uuid: existingLocationAttr.uuid }),
+    attributeType: { uuid: DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID },
+    value: roomUuid, // ✅ plain string
+  }
+];
+
+
+
+
+    return saveProvider(providerUuid, updatedAttributes);
+  })
+  .then(() => {
+    close();
+    showSnackbar({
+      title: t("locationChangedSuccessfully", "Location changed successfully"),
+      kind: "success",
+    });
+  })
+  .catch((error) => {
+    const errorMessage = error?.responseBody?.message ?? error?.message;
+    showSnackbar({
+      title: t("locationChangeFailed", "Location change failed"),
+      subtitle: errorMessage,
+      kind: "error",
+    });
+  })
+  .finally(() => {
+    setIsChangingRoom(false);
+  });
   },
-  [session, closeWorkspace, t, roomLocations]
+  [sessionUser?.user?.uuid, close, t]
 );
 
 
+
+const onError = () => setIsChangingRoom(false);
+
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmit, onError)}>
       <ModalHeader
         closeModal={close}
         title={t("changeLocation", "Change location")}
       />
       <ModalBody>
-        
-        <ContentSwitcher onChange={handleTabTypeChange}>
-  <Switch name="Change room" text={t("changeRoom", "Switch room")} />
-  <Switch name="Change clinic" text={t("changeClinic", "Switch only clinic")} />
-</ContentSwitcher>
-
         <Stack gap={5} className={styles.languageOptionsContainer}>
           <ResponsiveWrapper isTablet={isTablet}>
-            {tabType === "Change room" && (
-              <><Controller
-              name="clinicLocation"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  id="clinicLocation"
-                  name="clinicLocation"
-                  labelText="Select clinic"
-                  disabled={errorFetchingClinics}
-                  invalidText={errors.root?.message}
-                  value={field.value}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    field.onChange(selectedValue);
-                    setSelectedClinic(selectedValue);
-                  }}
-                >
-                  {!field.value && (
-                    <SelectItem
-                      value=""
-                      text={t(
-                        "selectClinic",
-                        "Choose clinic"
-                      )}
-                    />
-                  )}
-
-                  {clinicsList.map(({ uuid, display }) => (
-                    <SelectItem key={uuid} value={uuid} text={display} />
-                  ))}
-                </Select>
+            <Dropdown
+              id="location-options"
+              titleText={t(
+                "locationChangerOptions",
+                "Select location change option"
               )}
+              itemToString={(item) => (item ? item.label : "")}
+              items={locationList}
+              label="Choose option"
+              selectedItem={selectedLocationOption}
+              onChange={(event) =>
+                setSelectedLocationOption(event.selectedItem)
+              }
             />
-              <Controller
+            {selectedLocationOption?.id === "switchRoom" && (
+            <Controller
               name="clinicRoom"
               control={control}
               defaultValue={currentLocation}
@@ -168,7 +170,7 @@ const onSubmit: SubmitHandler<any> = useCallback(
                   id="clinicRoom"
                   name="clinicRoom"
                   labelText="Select room to change to"
-                  disabled={!selectedClinic || errorFetchingRooms}
+                  disabled={errorFetchingRooms}
                   invalidText={errors.locationTo?.message}
                   value={field.value}
                   onChange={(e) => {
@@ -180,10 +182,7 @@ const onSubmit: SubmitHandler<any> = useCallback(
                   {!field.value && (
                     <SelectItem
                       value=""
-                      text={t(
-                        "selectRoom",
-                        "Choose room"
-                      )}
+                      text={t("selectRoom", "Choose room")}
                     />
                   )}
 
@@ -192,20 +191,19 @@ const onSubmit: SubmitHandler<any> = useCallback(
                   ))}
                 </Select>
               )}
-            /></>
-            )}
-            {tabType === "Change clinic" && (
+            />)}
+            {selectedLocationOption?.id === "" && (
             <Controller
-              name="clinic"
+              name="clinicLocation"
               control={control}
-              defaultValue={currentLocation}
+              defaultValue=""
               render={({ field }) => (
                 <Select
                   {...field}
-                  id="clinic"
-                  name="clinic"
-                  labelText="Select clinic to change to"
-                  disabled={errorFetchingClinics}
+                  id="clinicLocation"
+                  name="clinicLocation"
+                  labelText="Select clinic"
+                  // disabled={errorFetchingClinics}
                   invalidText={errors.root?.message}
                   value={field.value}
                   onChange={(e) => {
@@ -217,16 +215,13 @@ const onSubmit: SubmitHandler<any> = useCallback(
                   {!field.value && (
                     <SelectItem
                       value=""
-                      text={t(
-                        "selectClinic",
-                        "Choose clinic"
-                      )}
+                      text={t("selectClinic", "Choose clinic")}
                     />
                   )}
 
-                  {clinicsList.map(({ uuid, display }) => (
+                  {/* {clinicsList.map(({ uuid, display }) => (
                     <SelectItem key={uuid} value={uuid} text={display} />
-                  ))}
+                  ))} */}
                 </Select>
               )}
             />)}
