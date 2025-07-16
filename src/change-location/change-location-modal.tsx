@@ -14,7 +14,12 @@ import {
   InlineNotification,
   InlineLoading,
 } from "@carbon/react";
-import { navigate, useLayoutType, useSession } from "@openmrs/esm-framework";
+import {
+  navigate,
+  useConfig,
+  useLayoutType,
+  useSession,
+} from "@openmrs/esm-framework";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import styles from "./change-location-link.scss";
 import { useTranslation } from "react-i18next";
@@ -58,7 +63,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
   const { roomLocations, error: errorFetchingRooms } = useRoomLocations(
     sessionUser?.sessionLocation?.uuid
   );
-  const openmrsSpaBase = window['getOpenmrsSpaBase']();
+  const openmrsSpaBase = window["getOpenmrsSpaBase"]();
 
   const changeLocationSchema = z.object({
     clinicRoom: z.string().min(1, "Room is required"),
@@ -105,19 +110,9 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
           })
           .then(() => {
             close();
-            showSnackbar({
-              title: t(
-                "locationChangedSuccessfully",
-                "Location changed successfully"
-              ),
-              kind: "success",
-            });
-              setTimeout(() => {
-    performLogout().then(() => {
-      navigate({ to: `${openmrsSpaBase}/login` }); // or just "/login"
-    });
-  }, 1000)
+            navigate({ to: `${openmrsSpaBase}logout` });
           })
+
           .catch((error) => {
             const errorMessage = error?.responseBody?.message ?? error?.message;
             setErrorMessage(errorMessage);
