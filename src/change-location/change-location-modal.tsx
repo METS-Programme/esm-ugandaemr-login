@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
   Button,
-  Dropdown,
   Form,
   Layer,
   ModalHeader,
@@ -9,17 +8,11 @@ import {
   ModalFooter,
   Select,
   SelectItem,
-  showSnackbar,
   Stack,
   InlineNotification,
   InlineLoading,
 } from "@carbon/react";
-import {
-  navigate,
-  useConfig,
-  useLayoutType,
-  useSession,
-} from "@openmrs/esm-framework";
+import { navigate, useLayoutType, useSession } from "@openmrs/esm-framework";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import styles from "./change-location-link.scss";
 import { useTranslation } from "react-i18next";
@@ -28,14 +21,16 @@ import z from "zod";
 import {
   getProvider,
   saveProviderAttributeType,
+  useClinicLocations,
+  useClinicRoomLocations,
   useRoomLocations,
+  useWardLocations,
 } from "./change-location.resource";
 import {
   DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
+  IPD_DEPARTMENT_UUID,
   locationChangerList,
 } from "../constants";
-import { LocationOption } from "../types";
-import { performLogout } from "../logout/logout.resource";
 
 interface ChangeLocationProps {
   close(): () => void;
@@ -51,31 +46,45 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
     id: item.id,
     label: item.label,
   }));
-  const [selectedLocationOption, setSelectedLocationOption] = useState<
-    LocationOption | undefined
-  >();
   const [isChangingRoom, setIsChangingRoom] = useState(false);
-  const [selectedClinicRoom, setselectedClinicRoom] = useState<
+  const [selectedClinicRoom, setSelectedClinicRoom] = useState<
     string | undefined
   >();
   const [selectedClinic, setSelectedClinic] = useState<string | undefined>();
   const [errorMessage, setErrorMessage] = useState(null);
-  const { roomLocations, error: errorFetchingRooms } = useRoomLocations(
-    sessionUser?.sessionLocation?.uuid
-  );
+  const {
+    roomLocations,
+    error: errorFetchingRooms,
+    parentLocation,
+  } = useRoomLocations(sessionUser?.sessionLocation?.uuid);
+  const { clinicRooms, error: errorFetchingClinicRooms } =
+    useClinicRoomLocations(selectedClinic);
+  const { clinicsList, error: errorFetchingClinics } = useClinicLocations();
+  const { wardList, error: errorfetchingWard } =
+    useWardLocations(IPD_DEPARTMENT_UUID);
+  const [selectedWard, setSelectedWard] = useState<string | undefined>();
   const openmrsSpaBase = window["getOpenmrsSpaBase"]();
 
   const changeLocationSchema = z.object({
-    clinicRoom: z.string().min(1, "Room is required"),
+    locationOption: z.object({
+      id: z.string(),
+      label: z.string(),
+    }),
+    clinicRoom: z.string().optional(),
+    clinicRoomFromClinicSelection: z.string().optional(),
+    wardRoom: z.string().optional(),
   });
 
   const {
     handleSubmit,
     control,
     formState: { errors },
+    watch,
   } = useForm({
     resolver: zodResolver(changeLocationSchema),
   });
+
+  const locationOption = watch("locationOption");
 
   const onSubmit: SubmitHandler<z.infer<typeof changeLocationSchema>> =
     useCallback(
@@ -83,7 +92,14 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
         setIsChangingRoom(true);
 
         const userUuid = sessionUser?.user?.uuid;
-        const roomUuid = data?.clinicRoom;
+        const roomUuid =
+          data?.locationOption?.id === "switchRoom"
+            ? data?.clinicRoom
+            : data?.locationOption?.id === "switchClinic"
+            ? data?.clinicRoomFromClinicSelection
+            : data?.locationOption?.id === "switchWard"
+            ? data?.wardRoom
+            : null;
 
         if (!userUuid || !roomUuid) return;
 
@@ -121,7 +137,7 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
             setIsChangingRoom(false);
           });
       },
-      [sessionUser?.user?.uuid, close, t]
+      [sessionUser?.user?.uuid, close, t, openmrsSpaBase]
     );
 
   const onError = () => setIsChangingRoom(false);
@@ -135,21 +151,36 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
       <ModalBody>
         <Stack gap={5} className={styles.languageOptionsContainer}>
           <ResponsiveWrapper isTablet={isTablet}>
-            <Dropdown
-              id="location-options"
-              titleText={t(
-                "locationChangerOptions",
-                "Select location change option"
+            <Controller
+              name="locationOption"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <Select
+                  id="locationOption"
+                  name="locationOption"
+                  labelText="Choose location change option"
+                  value={field.value?.id ?? ""}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const selectedObj = locationList.find(
+                      (loc) => loc.id === selectedId
+                    );
+                    field.onChange(selectedObj);
+                  }}
+                >
+                  <SelectItem
+                    value=""
+                    text={t("selectLocationChanger", "Choose option")}
+                  />
+                  {locationList.map(({ id, label }) => (
+                    <SelectItem key={id} value={id} text={label} />
+                  ))}
+                </Select>
               )}
-              itemToString={(item) => (item ? item.label : "")}
-              items={locationList}
-              label="Choose option"
-              selectedItem={selectedLocationOption}
-              onChange={(event) =>
-                setSelectedLocationOption(event.selectedItem)
-              }
             />
-            {selectedLocationOption?.id === "switchRoom" && (
+
+            {locationOption?.id === "switchRoom" && (
               <Controller
                 name="clinicRoom"
                 control={control}
@@ -161,12 +192,12 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
                     name="clinicRoom"
                     labelText="Select room to change to"
                     disabled={errorFetchingRooms}
-                    invalidText={errors.locationTo?.message}
+                    invalidText={errors.root?.message}
                     value={field.value}
                     onChange={(e) => {
                       const selectedValue = e.target.value;
                       field.onChange(selectedValue);
-                      setselectedClinicRoom(selectedValue);
+                      setSelectedClinicRoom(selectedValue);
                     }}
                   >
                     {!field.value && (
@@ -183,36 +214,99 @@ const ChangeLocationModal: React.FC<ChangeLocationProps> = ({ close }) => {
                 )}
               />
             )}
-            {selectedLocationOption?.id === "" && (
+            {locationOption?.id === "switchClinic" && (
+              <>
+                <Controller
+                  name="clinicLocation"
+                  control={control}
+                  defaultValue={parentLocation?.uuid}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id="clinicLocation"
+                      name="clinicLocation"
+                      labelText="Select clinic"
+                      disabled={errorFetchingClinics}
+                      invalidText={errors.root?.message}
+                      value={field.value}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        field.onChange(selectedValue);
+                        setSelectedClinic(selectedValue);
+                      }}
+                    >
+                      {!field.value && (
+                        <SelectItem
+                          value=""
+                          text={t("selectClinic", "Choose clinic")}
+                        />
+                      )}
+
+                      {clinicsList.map(({ uuid, display }) => (
+                        <SelectItem key={uuid} value={uuid} text={display} />
+                      ))}
+                    </Select>
+                  )}
+                />
+                <Controller
+                  name="clinicRoomFromClinicSelection"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id="clinicRoomFromClinicSelection"
+                      labelText="Select room in clinic"
+                      disabled={!selectedClinic || errorFetchingClinicRooms}
+                      value={field.value}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        field.onChange(selectedValue);
+                        setSelectedClinicRoom(selectedValue);
+                      }}
+                    >
+                      <SelectItem
+                        value=""
+                        text={t("selectRoom", "Choose room")}
+                      />
+                      {clinicRooms.map(({ uuid, display }) => (
+                        <SelectItem key={uuid} value={uuid} text={display} />
+                      ))}
+                    </Select>
+                  )}
+                />
+              </>
+            )}
+            {locationOption?.id === "switchWard" && (
               <Controller
-                name="clinicLocation"
+                name="wardRoom"
                 control={control}
                 defaultValue=""
                 render={({ field }) => (
                   <Select
                     {...field}
-                    id="clinicLocation"
-                    name="clinicLocation"
-                    labelText="Select clinic"
-                    // disabled={errorFetchingClinics}
+                    id="wardRoom"
+                    name="wardRoom"
+                    labelText="Select ward to change to"
+                    disabled={errorfetchingWard}
                     invalidText={errors.root?.message}
                     value={field.value}
                     onChange={(e) => {
                       const selectedValue = e.target.value;
                       field.onChange(selectedValue);
-                      setSelectedClinic(selectedValue);
+                      setSelectedWard(selectedValue);
                     }}
                   >
                     {!field.value && (
                       <SelectItem
                         value=""
-                        text={t("selectClinic", "Choose clinic")}
+                        text={t("selectWard", "Choose ward")}
                       />
                     )}
 
-                    {/* {clinicsList.map(({ uuid, display }) => (
-                    <SelectItem key={uuid} value={uuid} text={display} />
-                  ))} */}
+                    {wardList.map(({ uuid, display }) => (
+                      <SelectItem key={uuid} value={uuid} text={display} />
+                    ))}
                   </Select>
                 )}
               />

@@ -2,7 +2,12 @@ import { restBaseUrl, openmrsFetch } from "@openmrs/esm-framework";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { RoomsResponse } from "../types";
-import { DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID } from "../constants";
+import {
+  ADMISSION_TAG_UUID,
+  CLINIC_TAG_UUID,
+  DEFAULT_LOCATION_ATTRIBUTE_TYPE_UUID,
+  FACILITY_LOCATION_UUID,
+} from "../constants";
 
 export interface Provider {
   uuid?: string;
@@ -30,6 +35,27 @@ export interface Value {
   display: string;
 }
 
+export function useClinicLocations() {
+  const apiUrl = `${restBaseUrl}/location/${FACILITY_LOCATION_UUID}?v=full`;
+  const { data, error, isLoading, mutate } = useSWR<{ data: RoomsResponse }>(
+    apiUrl,
+    openmrsFetch
+  );
+
+  const clinicsList = useMemo(() => {
+    return data?.data?.childLocations?.filter((location) =>
+      location.tags?.some((tag) => tag.uuid === CLINIC_TAG_UUID)
+    );
+  }, [data?.data?.childLocations]);
+
+  return {
+    clinicsList,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
 export function useRoomLocations(currentQueueLocation?: string) {
   const apiUrl = currentQueueLocation
     ? `${restBaseUrl}/location/${currentQueueLocation}?v=full`
@@ -45,12 +71,58 @@ export function useRoomLocations(currentQueueLocation?: string) {
       [],
     [data?.data?.parentLocation?.childLocations]
   );
+
   return {
     roomLocations: clinicRoomLocations.filter(
       (location) => location?.uuid != null
     )
       ? clinicRoomLocations
       : [],
+    parentLocation: data?.data?.parentLocation ?? null,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+export function useClinicRoomLocations(clinicUuid?: string) {
+  const apiUrl = clinicUuid
+    ? `${restBaseUrl}/location/${clinicUuid}?v=full`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<{ data: RoomsResponse }>(
+    apiUrl,
+    openmrsFetch
+  );
+
+  const clinicRooms = useMemo(
+    () => data?.data?.childLocations ?? [],
+    [data?.data?.childLocations]
+  );
+
+  return {
+    clinicRooms,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+export function useWardLocations(IPD_DEPARTMENT_UUID?: string) {
+  const apiUrl = IPD_DEPARTMENT_UUID
+    ? `${restBaseUrl}/location/${IPD_DEPARTMENT_UUID}?v=full`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<{ data: RoomsResponse }>(
+    apiUrl,
+    openmrsFetch
+  );
+
+  const wardList = useMemo(
+    () => data?.data?.childLocations ?? [],
+    [data?.data?.childLocations]
+  );
+
+  return {
+    wardList,
     isLoading,
     error,
     mutate,

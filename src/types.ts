@@ -98,7 +98,7 @@ export interface RoomsResponse {
   description: string;
   tags: Tags[];
   parentLocation: ParentLocation;
-  childLocations: string[];
+  childLocations: ChildLocation[];
   retired: boolean;
   attributes: string[];
   links: Links[];
@@ -108,13 +108,14 @@ export interface ParentLocation {
   uuid: string;
   display: string;
   parentLocation: ParentLocation;
-  childLocations: ChildLocations[];
+  childLocations: ChildLocation[];
   links: Links[];
 }
 
-export interface ChildLocations {
+export interface ChildLocation {
   uuid: string;
   display: string;
+  tags: Tags[];
   links: Links[];
 }
 
