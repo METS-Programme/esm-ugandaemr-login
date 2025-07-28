@@ -2,12 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Controller,
-  FieldError,
-  useForm,
-  type SubmitHandler,
-} from "react-hook-form";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import {
   Button,
   Form,

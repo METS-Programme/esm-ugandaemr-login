@@ -1,0 +1,26 @@
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/styles/scss/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.switch {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+section {
+    margin: spacing.$spacing-03;
+}
+
+.sectionTitle {
+    @include type.type-style('heading-compact-02');
+    color: $text-02;
+    margin-bottom: spacing.$spacing-04;
+}
