@@ -82,6 +82,11 @@ export const configSchema = {
     _description: "Whether to show the login screen centered.",
     _default: false,
   },
+  showDefaultHome: {
+    _type: Type.Boolean,
+    _description: "Whether to show/use the default /home link.",
+    _default: false,
+  },
   supportEmail: {
     _type: Type.String,
     _default: "emrtalk@musph.ac.ug",

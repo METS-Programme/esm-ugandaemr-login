@@ -110,7 +110,7 @@ const Login: React.FC<LoginReferrer> = () => {
     clearCurrentUser();
     refetchCurrentUser().then(() => {
       const authenticated = getSessionStore().getState().session.authenticated;
-
+      const default_url = config.showDefaultHome ? "home" : "home/initial-page";
       if (authenticated) {
         const roles = getSessionStore().getState().session?.user?.roles;
         const roleName = roles[0]?.display;
@@ -140,7 +140,7 @@ const Login: React.FC<LoginReferrer> = () => {
               to: `${window.getOpenmrsSpaBase()}dispensing`,
             });
           } else {
-            navigate({ to: `${window.getOpenmrsSpaBase()}home/initial-page` });
+            navigate({ to: `${window.getOpenmrsSpaBase()}${default_url}` });
           }
         }
       }
