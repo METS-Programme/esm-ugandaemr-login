@@ -239,7 +239,7 @@ const Login: React.FC<LoginReferrer> = () => {
               </span>
               {!config?.showCenteredLogin ? (
                 <span className={styles.link}>
-                  <a href={config?.orgUrl}>{config?.orgName}</a>
+                  <a href={config?.orgUrl}>{config?.orgDescription}</a>
                 </span>
               ) : null}
             </div>
