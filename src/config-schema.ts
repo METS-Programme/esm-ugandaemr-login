@@ -97,4 +97,15 @@ export const configSchema = {
     _default: "omrs-logo-partial-mono",
     _description: "Choice of powered by OpenMRS logo to render",
   },
+  orgUrl: {
+    _type: Type.String,
+    _default: "http://www.health.go.ug/",
+    _description: "Organization Url",
+  },
+
+  orgDescription: {
+    _type: Type.String,
+    _default: "Ministry of Health - Republic of Uganda",
+    _description: "Ministry of Health - Republic of Uganda",
+  },
 };

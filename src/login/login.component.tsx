@@ -239,9 +239,7 @@ const Login: React.FC<LoginReferrer> = () => {
               </span>
               {!config?.showCenteredLogin ? (
                 <span className={styles.link}>
-                  <a href="http://www.health.go.ug/">
-                    Ministry of Health - Republic of Uganda
-                  </a>
+                  <a href={config?.orgUrl}>{config?.orgDescription}</a>
                 </span>
               ) : null}
             </div>
