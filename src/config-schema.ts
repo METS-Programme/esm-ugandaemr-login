@@ -1,6 +1,12 @@
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
+  defaultLoginLocationUuid: {
+    _type: Type.String,
+    _default: "629d78e9-93e5-43b0-ad8a-48313fd99117",
+    _description:
+      "Default session location UUID used when user has not selected a location.",
+  },
   provider: {
     type: {
       _type: Type.String,
