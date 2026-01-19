@@ -42,7 +42,7 @@ export async function getProvider(userUUID: string, token: string) {
 }
 
 export function useFacilityName() {
-  const apiURL = `${restBaseUrl}/systemsetting/ugandaemr.healthCenterName`;
+  const apiURL = `${restBaseUrl}/ugandaemr/gp?property=ugandaemr.healthCenterName`;
 
   const { data, error, isLoading } = useSWR<{ data }, Error>(
     apiURL,
