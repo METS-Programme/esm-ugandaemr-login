@@ -1,6 +1,11 @@
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
+  healthCenterName: {
+    _type: Type.String,
+    _default: "Health Center Name",
+    _description: "Global property key for facility name",
+  },
   defaultLoginLocationUuid: {
     _type: Type.String,
     _default: "629d78e9-93e5-43b0-ad8a-48313fd99117",
