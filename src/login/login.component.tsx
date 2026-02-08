@@ -189,7 +189,9 @@ const Login: React.FC<LoginReferrer> = () => {
             <Logo className={styles.logo} />
           </div>
           <Tile className={styles["login-card"]}>
-            <div className={styles.facilityNameContainer}>{facilityName}</div>
+            <div className={styles.facilityNameContainer}>
+              {facilityName || config.healthCenterName}
+            </div>
             {errorMessage && (
               <InlineNotification
                 className={styles.errorMessage}
