@@ -108,6 +108,12 @@ export const configSchema = {
     _default: "omrs-logo-partial-mono",
     _description: "Choice of powered by OpenMRS logo to render",
   },
+  footerLogos: {
+    _type: Type.Array,
+    _default: [],
+    _description:
+      "List of logos to display in footer (supports SVG sprite or image)",
+  },
   orgUrl: {
     _type: Type.String,
     _default: "http://www.health.go.ug/",

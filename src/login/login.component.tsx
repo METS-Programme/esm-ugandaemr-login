@@ -286,9 +286,38 @@ const Login: React.FC<LoginReferrer> = () => {
               <span className={styles.poweredByTxt}>
                 {t("poweredBy", "Powered by")}
               </span>
-              <svg className={styles["powered-by-logo"]}>
-                <use xlinkHref={`#${config?.footerOpenMRSLogo}`}></use>
-              </svg>
+
+              <div className={styles.footerLogoContainer}>
+                {(config?.footerLogos?.length
+                  ? config.footerLogos
+                  : [{ type: "sprite", id: config?.footerOpenMRSLogo }]
+                ).map((logo, index) => {
+                  if (logo.type === "sprite") {
+                    return (
+                      <svg
+                        key={index}
+                        className={styles["powered-by-logo"]}
+                        aria-label={logo.alt}
+                      >
+                        <use xlinkHref={`#${logo.id}`} />
+                      </svg>
+                    );
+                  }
+
+                  if (logo.type === "image") {
+                    return (
+                      <img
+                        key={index}
+                        src={logo.src}
+                        alt={logo.alt}
+                        className={styles["powered-by-logo"]}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
+              </div>
             </div>
           </div>
         </div>
