@@ -13,6 +13,7 @@ on:
 env:
   ESM_NAME: "@ugandaemr/esm-login-app"
   JS_NAME: "esm-ugandaemr-login.js"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
