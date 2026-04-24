@@ -259,4 +259,17 @@
         }
     }
 
+    .footerLogoContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .powered-by-logo {
+        height: 2rem;
+        width: auto;
+        object-fit: contain;
+    }
 }

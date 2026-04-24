@@ -103,10 +103,27 @@ export const configSchema = {
     _default: "emrtalk@musph.ac.ug",
     _description: "Support email for the system",
   },
-  footerOpenMRSLogo: {
-    _type: Type.String,
-    _default: "omrs-logo-partial-mono",
-    _description: "Choice of powered by OpenMRS logo to render",
+
+  footerLogos: {
+    _type: Type.Array,
+    _default: [
+      {
+        type: "sprite",
+        id: "omrs-logo-partial-mono",
+        alt: "OpenMRS",
+      },
+      {
+        type: "sprite",
+        id: "omrs-logo-partial-mono",
+        alt: "OpenMRS",
+      },
+      {
+        type: "sprite",
+        id: "omrs-logo-partial-mono",
+        alt: "OpenMRS",
+      },
+    ],
+    _description: "List of logos to display in footer",
   },
   orgUrl: {
     _type: Type.String,
