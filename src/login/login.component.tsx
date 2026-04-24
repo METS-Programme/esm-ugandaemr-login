@@ -292,7 +292,6 @@ const Login: React.FC<LoginReferrer> = () => {
                   ? config.footerLogos
                   : [{ type: "sprite", id: config?.footerOpenMRSLogo }]
                 ).map((logo, index) => {
-                  // ✅ handle string case
                   if (typeof logo === "string") {
                     return (
                       <svg key={index} className={styles["powered-by-logo"]}>
@@ -300,8 +299,6 @@ const Login: React.FC<LoginReferrer> = () => {
                       </svg>
                     );
                   }
-
-                  // ✅ sprite object
                   if (logo.type === "sprite") {
                     return (
                       <svg key={index} className={styles["powered-by-logo"]}>
@@ -309,8 +306,6 @@ const Login: React.FC<LoginReferrer> = () => {
                       </svg>
                     );
                   }
-
-                  // ✅ image
                   if (logo.type === "image") {
                     return (
                       <img
