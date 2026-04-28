@@ -112,16 +112,6 @@ export const configSchema = {
         id: "omrs-logo-partial-mono",
         alt: "OpenMRS",
       },
-      {
-        type: "sprite",
-        id: "omrs-logo-partial-mono",
-        alt: "OpenMRS",
-      },
-      {
-        type: "sprite",
-        id: "omrs-logo-partial-mono",
-        alt: "OpenMRS",
-      },
     ],
     _description: "List of logos to display in footer",
   },
