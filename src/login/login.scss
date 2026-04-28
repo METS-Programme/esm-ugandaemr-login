@@ -261,21 +261,22 @@
 
     .footerLogoContainer {
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 0.75rem;
+        flex-wrap: wrap; // allows responsive wrapping if many logos
+        gap: 12px; // spacing between logos
     }
 
     .logoWrapper {
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 auto;
     }
 
     .powered-by-logo {
-        height: 2rem;
+        height: 32px;
         width: auto;
-        object-fit: contain;
+        display: block;
     }
 }

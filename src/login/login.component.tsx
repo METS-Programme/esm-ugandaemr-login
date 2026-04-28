@@ -38,35 +38,14 @@ const Login: React.FC<LoginReferrer> = () => {
   const nav = useNavigate();
   const { user } = useSession();
   const { facilityName } = useFacilityName();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [hasUserLocation, setHasUserLocation] = useState(false);
-
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  // ✅ NEW: logo sizing logic
-  const omrsRef = useRef<HTMLDivElement>(null);
-  const [logoSize, setLogoSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (omrsRef.current) {
-      const rect = omrsRef.current.getBoundingClientRect();
-      if (rect.width && rect.height) {
-        setLogoSize({
-          width: rect.width,
-          height: rect.height,
-        });
-      }
-    }
-  }, []);
+  const [hasUserLocation, setHasUserLocation] = useState(false);
 
   const changeUsername = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => setUsername(evt.target.value),
@@ -85,7 +64,6 @@ const Login: React.FC<LoginReferrer> = () => {
 
       setIsLoggingIn(true);
       const token = window.btoa(`${username}:${password}`);
-
       performLogin(token).then(
         (loginResponse) => {
           if (
@@ -93,7 +71,6 @@ const Login: React.FC<LoginReferrer> = () => {
             loginResponse?.data?.authenticated
           ) {
             const userUUID = loginResponse.data?.user?.uuid;
-
             getProvider(userUUID, token).then(
               async (providerResponse) => {
                 if (providerResponse.status === 200) {
@@ -116,6 +93,7 @@ const Login: React.FC<LoginReferrer> = () => {
                   setIsLoggingIn(false);
 
                   if (!locationUuidToUse) {
+                    // No location available - don't proceed
                     setHasUserLocation(false);
                     setErrorMessage(
                       "No login location is available for this account. Please contact an administrator."
@@ -127,6 +105,7 @@ const Login: React.FC<LoginReferrer> = () => {
                     locationUuidToUse,
                     new AbortController()
                   );
+
                   setHasUserLocation(true);
                 } else {
                   setIsLoggingIn(false);
@@ -157,13 +136,15 @@ const Login: React.FC<LoginReferrer> = () => {
     refetchCurrentUser().then(() => {
       const authenticated = getSessionStore().getState().session.authenticated;
       const default_url = config.showDefaultHome ? "home" : "home/initial-page";
-
       if (authenticated) {
         const roles = getSessionStore().getState().session?.user?.roles;
         const roleName = roles[0]?.display;
-
-        if (roles?.length > 0) {
-          if (roles.some((r) => r?.display === "Organizational: Clinician")) {
+        if (roles && roles?.length > 0) {
+          if (
+            roles?.filter(
+              (item) => item?.display === "Organizational: Clinician"
+            ).length > 0
+          ) {
             navigate({
               to: `${window.getOpenmrsSpaBase()}home/clinical-room-patient-queues`,
             });
@@ -176,9 +157,13 @@ const Login: React.FC<LoginReferrer> = () => {
               to: `${window.getOpenmrsSpaBase()}home/reception-patient-queues`,
             });
           } else if (roleName === "Organizational: Laboratory") {
-            navigate({ to: `${window.getOpenmrsSpaBase()}home/laboratory` });
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}home/laboratory`,
+            });
           } else if (roleName === "Organizational:Pharmacy") {
-            navigate({ to: `${window.getOpenmrsSpaBase()}dispensing` });
+            navigate({
+              to: `${window.getOpenmrsSpaBase()}dispensing`,
+            });
           } else {
             navigate({ to: `${window.getOpenmrsSpaBase()}${default_url}` });
           }
@@ -189,13 +174,12 @@ const Login: React.FC<LoginReferrer> = () => {
 
   useEffect(() => {
     const { pathname } = location;
-
     if (hasUserLocation || user) {
       handleAuthenticatedUser();
     } else if (!username && pathname === "/login/confirm") {
       nav("/login", { state: location?.state });
     }
-  }, [username, nav, location, hasUserLocation, user]);
+  }, [username, nav, location, hasUserLocation, user, handleAuthenticatedUser]);
 
   if (config.provider.type === "basic") {
     return (
@@ -204,12 +188,10 @@ const Login: React.FC<LoginReferrer> = () => {
           <div className={styles.logoContainer}>
             <Logo className={styles.logo} />
           </div>
-
           <Tile className={styles["login-card"]}>
             <div className={styles.facilityNameContainer}>
               {facilityName || config.healthCenterName}
             </div>
-
             {errorMessage && (
               <InlineNotification
                 className={styles.errorMessage}
@@ -219,104 +201,124 @@ const Login: React.FC<LoginReferrer> = () => {
                 onClick={() => setErrorMessage("")}
               />
             )}
-
             <form onSubmit={handleSubmit} ref={formRef}>
               <div className={styles["input-group"]}>
-                <TextInput
-                  id="username"
-                  labelText={t("username", "Username")}
-                  value={username}
-                  onChange={changeUsername}
-                  ref={usernameInputRef}
-                  required
-                />
-
+                <div className={styles["input-container"]}>
+                  <TextInput
+                    id="username"
+                    type="text"
+                    name="username"
+                    labelText={t("username", "Username")}
+                    value={username}
+                    onChange={changeUsername}
+                    ref={usernameInputRef}
+                    autoFocus
+                    required
+                  />
+                </div>
                 <div style={{ marginTop: "1rem" }} />
+                <div className={styles["input-group"]}>
+                  <PasswordInput
+                    id="password"
+                    invalidText={t(
+                      "validValueRequired",
+                      "A valid value is required"
+                    )}
+                    labelText={t("password", "Password")}
+                    name="password"
+                    value={password}
+                    onChange={changePassword}
+                    ref={passwordInputRef}
+                    required
+                    showPasswordLabel="Show password"
+                  />
+                </div>
 
-                <PasswordInput
-                  id="password"
-                  labelText={t("password", "Password")}
-                  value={password}
-                  onChange={changePassword}
-                  ref={passwordInputRef}
-                  required
-                />
-
-                <Button
-                  type="submit"
-                  className={styles.continueButton}
-                  renderIcon={(props) => <ArrowRight size={24} {...props} />}
-                  disabled={!isLoginEnabled || isLoggingIn}
-                >
-                  {isLoggingIn ? (
-                    <InlineLoading description="Logging in..." />
-                  ) : (
-                    "Log in"
-                  )}
-                </Button>
+                <div>
+                  <div>
+                    <Button
+                      type="submit"
+                      className={styles.continueButton}
+                      renderIcon={(props) => (
+                        <ArrowRight size={24} {...props} />
+                      )}
+                      iconDescription="Log in"
+                      disabled={!isLoginEnabled || isLoggingIn}
+                    >
+                      {isLoggingIn ? (
+                        <InlineLoading
+                          className={styles.loader}
+                          description={t("loggingIn", "Logging in") + "..."}
+                        />
+                      ) : (
+                        <span>{t("login", "Log in")}</span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </form>
           </Tile>
-
-          {/* ✅ FOOTER */}
           <div className={styles.footer}>
+            <div className={styles.links}>
+              <span className={styles.link}>
+                © {new Date().getFullYear()} All rights reserved
+              </span>
+              {!config?.showCenteredLogin ? (
+                <span className={styles.link}>
+                  <a href={config?.orgUrl}>{config?.orgDescription}</a>
+                </span>
+              ) : null}
+            </div>
+            <span className={styles.link}>
+              Need help? Contact us at{" "}
+              <a href={`mailto:${config?.supportEmail}`}>
+                {config?.supportEmail}
+              </a>{" "}
+              support
+            </span>
+            {!config?.showCenteredLogin ? (
+              <span className={styles.link}>
+                Go to <a href={`/openmrs/login.htm`}> Legacy UI</a>
+              </span>
+            ) : null}
             <div className={styles.attribution}>
-              <span className={styles.poweredByTxt}>Powered by</span>
+              <span className={styles.poweredByTxt}>
+                {t("poweredBy", "Powered by")}
+              </span>
 
               <div className={styles.footerLogoContainer}>
                 {(config?.footerLogos?.length
                   ? config.footerLogos
                   : [{ type: "sprite", id: config?.footerOpenMRSLogo }]
                 ).map((logo, index) => {
-                  const isOpenMRS =
-                    logo?.id === config?.footerOpenMRSLogo || index === 0;
-
-                  const sizeStyle =
-                    !isOpenMRS && logoSize
-                      ? {
-                          width: `${logoSize.width}px`,
-                          height: `${logoSize.height}px`,
-                        }
-                      : {};
-
-                  let content = null;
-
-                  if (typeof logo === "string") {
-                    content = (
-                      <svg
-                        className={styles["powered-by-logo"]}
-                        style={sizeStyle}
-                      >
-                        <use xlinkHref={`#${logo}`} />
-                      </svg>
-                    );
-                  } else if (logo.type === "sprite") {
-                    content = (
-                      <svg
-                        className={styles["powered-by-logo"]}
-                        style={sizeStyle}
-                      >
-                        <use xlinkHref={`#${logo.id}`} />
-                      </svg>
-                    );
-                  } else if (logo.type === "image") {
-                    content = (
-                      <img
-                        src={logo.src}
-                        alt={logo.alt}
-                        className={styles["powered-by-logo"]}
-                        style={sizeStyle}
-                      />
-                    );
-                  }
-
                   return (
-                    <div
-                      key={index}
-                      className={styles.logoWrapper}
-                      ref={isOpenMRS ? omrsRef : null}
-                    >
-                      {content}
+                    <div key={index} className={styles.logoWrapper}>
+                      {typeof logo === "string" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo}`} />
+                          </svg>
+                        </div>
+                      )}
+
+                      {typeof logo !== "string" && logo.type === "sprite" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo.id}`} />
+                          </svg>
+                        </div>
+                      )}
+
+                      {typeof logo !== "string" && logo.type === "image" && (
+                        <div className={styles.logoItem}>
+                          <img
+                            src={logo.src}
+                            alt={logo.alt}
+                            className={styles["powered-by-logo"]}
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -327,7 +329,6 @@ const Login: React.FC<LoginReferrer> = () => {
       </BackgroundWrapper>
     );
   }
-
   return null;
 };
 
