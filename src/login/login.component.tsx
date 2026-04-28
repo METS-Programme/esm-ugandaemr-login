@@ -179,7 +179,7 @@ const Login: React.FC<LoginReferrer> = () => {
     } else if (!username && pathname === "/login/confirm") {
       nav("/login", { state: location?.state });
     }
-  }, [username, nav, location, hasUserLocation, user, handleAuthenticatedUser]);
+  }, [username, nav, location, hasUserLocation, user]);
 
   if (config.provider.type === "basic") {
     return (
