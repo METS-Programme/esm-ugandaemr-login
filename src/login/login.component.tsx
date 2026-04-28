@@ -292,32 +292,35 @@ const Login: React.FC<LoginReferrer> = () => {
                   ? config.footerLogos
                   : [{ type: "sprite", id: config?.footerOpenMRSLogo }]
                 ).map((logo, index) => {
-                  if (typeof logo === "string") {
-                    return (
-                      <svg key={index} className={styles["powered-by-logo"]}>
-                        <use xlinkHref={`#${logo}`} />
-                      </svg>
-                    );
-                  }
-                  if (logo.type === "sprite") {
-                    return (
-                      <svg key={index} className={styles["powered-by-logo"]}>
-                        <use xlinkHref={`#${logo.id}`} />
-                      </svg>
-                    );
-                  }
-                  if (logo.type === "image") {
-                    return (
-                      <img
-                        key={index}
-                        src={logo.src}
-                        alt={logo.alt}
-                        className={styles["powered-by-logo"]}
-                      />
-                    );
-                  }
+                  return (
+                    <div key={index} className={styles.logoWrapper}>
+                      {typeof logo === "string" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo}`} />
+                          </svg>
+                        </div>
+                      )}
 
-                  return null;
+                      {typeof logo !== "string" && logo.type === "sprite" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo.id}`} />
+                          </svg>
+                        </div>
+                      )}
+
+                      {typeof logo !== "string" && logo.type === "image" && (
+                        <div className={styles.logoItem}>
+                          <img
+                            src={logo.src}
+                            alt={logo.alt}
+                            className={styles["powered-by-logo"]}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
                 })}
               </div>
             </div>

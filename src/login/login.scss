@@ -261,17 +261,23 @@
 
     .footerLogoContainer {
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .logoWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .powered-by-logo {
-        height: 2rem;
+        height: 40px;
         width: auto;
-        max-width: 120px;
         object-fit: contain;
-        flex: 0 0 auto;
+        display: block;
     }
 }
