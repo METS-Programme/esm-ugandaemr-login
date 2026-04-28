@@ -270,6 +270,8 @@
     .powered-by-logo {
         height: 2rem;
         width: auto;
+        max-width: 120px;
         object-fit: contain;
+        flex: 0 0 auto;
     }
 }
