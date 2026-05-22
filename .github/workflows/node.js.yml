@@ -108,9 +108,7 @@ jobs:
       - run: git add . && git commit -m "Prerelease version" --no-verify
 
       - name: 🚢 Pre-release
-        run: |
-          yarn config set npmAuthToken "${NODE_AUTH_TOKEN}"
-          yarn npm publish --access public --tag next
+        run: npm publish --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
@@ -155,6 +153,6 @@ jobs:
       - run: yarn turbo run build --color
 
       - name: 🚢 Publish
-        run: yarn run ci:publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
