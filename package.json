@@ -51,7 +51,12 @@
         "zod": "^3.23.8"
     },
     "files": [
-        "*"
+        "dist",
+        "src",
+        "translations",
+        "package.json",
+        "README.md",
+        "LICENSE"
     ],
     "peerDependencies": {
         "@carbon/react": "^1.83.0",
