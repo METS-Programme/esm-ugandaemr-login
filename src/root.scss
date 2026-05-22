@@ -2,6 +2,13 @@
 @use "@carbon/styles/scss/spacing";
 @use "@openmrs/esm-styleguide/src/vars" as *;
 
+/* Hide the top navigation container on login pages */
+body #omrs-top-nav-app-container,
+#omrs-top-nav-app-container {
+  display: none !important;
+  height: 0 !important;
+}
+
 .productiveHeading01 {
   @include type.type-style("heading-compact-01");
 }

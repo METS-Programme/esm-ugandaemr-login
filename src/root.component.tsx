@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./login/login.component";
 import RedirectLogout from "./redirect-logout/redirect-logout.component";
 import ConfirmLocation from "./confirm-location/confirm.location.component";
+import "./root.scss";
 
 const Root: React.FC = () => {
   return (
