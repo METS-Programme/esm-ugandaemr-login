@@ -1,1 +1,33 @@
-node_modules/
+# Dependencies
+node_modules
+.yarn
+.yarnrc.yml
+
+# Build artifacts
+dist-build-*
+
+# CI/CD
+.github
+.husky
+
+# Development files
+*.log
+.env
+.env.*
+.DS_Store
+*.tgz
+
+# Testing
+coverage
+.nyc_output
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Misc
+.___***
+***-build.log
