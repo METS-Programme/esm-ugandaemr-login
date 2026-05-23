@@ -47,7 +47,7 @@
     },
     {
       "name": "change-location-modal",
-            "component": "changeLocationModal"
+      "component": "changeLocationModal"
     }
   ]
 }
