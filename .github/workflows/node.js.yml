@@ -1,7 +1,6 @@
 name: UgandaEMR CI
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -11,17 +10,13 @@ on:
       - created
 
 env:
-  ESM_NAME: "@ugandaemr/esm-login-app"
-  JS_NAME: "esm-ugandaemr-login.js"
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  TURBO_API: "http://127.0.0.1:9080"
+  TURBO_TOKEN: "turbo-token"
+  TURBO_TEAM: ${{ github.repository_owner }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TURBO_API: 'http://127.0.0.1:9080'
-      TURBO_TOKEN: ${{ secrets.TURBO_SERVER_TOKEN }}
-      TURBO_TEAM: ${{ github.repository_owner }}
 
     steps:
       - uses: actions/checkout@v4
@@ -29,37 +24,44 @@ jobs:
       - name: 🟢 Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: 🔧 Set npm registry for Yarn
-        run: yarn config set npmRegistryServer "https://registry.npmjs.org"
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
 
       - name: 💾 Cache dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          path: |
-            .yarn/cache
-            .yarn/install-state.gz
+          path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: 📦 Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
 
       - name: 🚀 Setup local cache server for Turborepo
         uses: felixmosh/turborepo-gh-artifacts@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          server-token: ${{ secrets.TURBO_SERVER_TOKEN }}
+          server-token: ${{ env.TURBO_TOKEN }}
 
-      - run: yarn verify
-      - run: yarn turbo build --color --concurrency=5
+      - name: ✅ Verify
+        run: yarn verify
+
+      - name: 🛠️ Build
+        run: yarn turbo run build --color --concurrency=5
 
       - name: 📤 Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ github.job }}-${{ github.run_id }}
-          path: dist
+          name: dist
+          path: |
+            dist
+          overwrite: true
 
   pre_release:
     runs-on: ubuntu-latest
@@ -69,25 +71,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: 🔧 Set npm registry for Yarn
-        run: yarn config set npmRegistryServer "https://registry.npmjs.org"
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
 
       - name: 💾 Cache dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          path: |
-            .yarn/cache
-            .yarn/install-state.gz
+          path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: 📦 Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
+
+      - name: 🚀 Setup local cache server for Turborepo
+        uses: felixmosh/turborepo-gh-artifacts@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          server-token: ${{ env.TURBO_TOKEN }}
 
       - name: 🏷️ Version
         run: yarn version "$(node -e "console.log(require('semver').inc(require('./package.json').version, 'patch'))")-pre.${{ github.run_number }}"
@@ -95,13 +108,36 @@ jobs:
       - name: 🛠️ Build
         run: yarn turbo run build --color --concurrency=5
 
-      - run: git config user.email "<>" && git config user.name "OpenMRS CI"
-      - run: git add . && git commit -m "Prerelease version" --no-verify
+      - name: ✅ Verify package contains routes.json
+        run: |
+          yarn pack --out package.tgz
+          tar -tf package.tgz | grep -E '^package/routes.json$' || (echo "root routes.json missing from tarball" && exit 1)
 
-      - name: 🚢 Pre-release
-        run: npm publish --access public --tag next
+      - name: Commit prerelease version
+        run: |
+          git config user.email "<>"
+          git config user.name "UgandaEMR CI"
+          git add .
+          git commit -m "Prerelease version" --no-verify
+
+      - name: 🚢 Publish prerelease
+        run: |
+          yarn config set npmAuthToken "${NPM_AUTH_TOKEN}"
+          yarn npm publish --access public --tag next
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Cleanup tarball
+        if: always()
+        run: rm -f package.tgz
+
+      - name: 📤 Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist
+          overwrite: true
 
   release:
     runs-on: ubuntu-latest
@@ -111,29 +147,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+
       - name: 🟢 Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: 🔧 Set npm registry for Yarn
-        run: yarn config set npmRegistryServer "https://registry.npmjs.org"
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
 
       - name: 💾 Cache dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          path: |
-            .yarn/cache
-            .yarn/install-state.gz
+          path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: 📦 Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
 
-      - run: yarn turbo run build --color
+      - name: 🛠️ Build
+        run: yarn turbo run build --color
 
-      - name: 🚢 Publish
-        run: npm publish --access public
+      - name: ✅ Verify package contains routes.json
+        run: |
+          yarn pack --out package.tgz
+          tar -tf package.tgz | grep -E '^package/routes.json$' || (echo "root routes.json missing from tarball" && exit 1)
+
+      - name: 🚢 Publish to NPM
+        run: |
+          yarn config set npmAuthToken "${NPM_AUTH_TOKEN}"
+          yarn npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Cleanup tarball
+        if: always()
+        run: rm -f package.tgz
+
+      - name: 📤 Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist
+          overwrite: true
