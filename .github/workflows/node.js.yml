@@ -122,8 +122,7 @@ jobs:
 
       - name: 🚢 Publish prerelease
         run: |
-          yarn config set npmAuthToken "${NPM_AUTH_TOKEN}"
-          yarn npm publish --access public --tag next
+          yarn npm publish --access public --tag next --npm-token "${NPM_AUTH_TOKEN}"
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
@@ -182,8 +181,7 @@ jobs:
 
       - name: 🚢 Publish to NPM
         run: |
-          yarn config set npmAuthToken "${NPM_AUTH_TOKEN}"
-          yarn npm publish --access public
+          yarn npm publish --access public --npm-token "${NPM_AUTH_TOKEN}"
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
