@@ -75,16 +75,46 @@
 }
 
 .attribution {
-    margin: 3rem 0;
+    margin: 2rem 0 1rem;
     display: flex;
-    flex-flow: row wrap;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.75rem;
+}
 
-    svg {
-        height: 2rem;
-        width: 7rem;
-    }
+.footerLogoContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.logoWrapper,
+.logoItem {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.logoWrapper:not(:last-child) {
+    padding-right: 1rem;
+    border-right: 1px solid colors.$gray-20;
+}
+
+.powered-by-logo {
+    height: 2.25rem;
+    max-width: 7.5rem;
+    width: auto;
+    object-fit: contain;
+    display: block;
 }
 
 @media screen and (min-width: 1150px) {
@@ -125,6 +155,8 @@
     text-align: center;
     color: $color-gray-70;
     color: $text-02;
+    font-weight: 600;
+    letter-spacing: 0.01rem;
 }
 
 .need-help {
@@ -243,12 +275,16 @@
 
     :global(.cds--label) {
         font-weight: bold;
-      color: $color-gray-100
+        color: $color-gray-100
     }
 
     .poweredByTxt {
         color: #ffffff;
         font-weight: bold;
+    }
+
+    .footerLogoContainer {
+        background-color: rgba(255, 255, 255, 0.88);
     }
 
     .link {
@@ -257,28 +293,5 @@
             color: #ffffff;
             font-weight: bold;
         }
-    }
-
-    .footerLogoContainer {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        flex-wrap: nowrap;
-    }
-
-    .logoWrapper {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: auto;
-        flex: 0 0 auto;
-    }
-
-    .powered-by-logo {
-        height: 2rem;
-        width: auto;
-        display: block;
     }
 }
