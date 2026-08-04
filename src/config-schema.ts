@@ -73,6 +73,12 @@ export const configSchema = {
       _default: "Background",
       _description: "Alt text, shown on hover",
     },
+    maxWidth: {
+      _type: Type.String,
+      _default: "55%",
+      _description:
+        "Maximum width of the background image on large screens (e.g., '55%', '60%')",
+    },
   },
   loginBanner: {
     src: {

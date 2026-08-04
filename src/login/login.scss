@@ -39,7 +39,7 @@
 
     .backgroundImage {
         object-fit: fit;
-        max-width: 55%;
+        max-width: var(--login-background-max-width, 55%);
         /* Fit image for larger screens */
     }
 }

@@ -20,6 +20,12 @@ const BackgroundWrapper = ({ children }) => {
         src={config?.loginBackground?.src ?? "/openmrs/spa/background.png"}
         alt={config?.loginBackground?.alt || "Background Image"}
         className={styles.backgroundImage}
+        style={
+          {
+            "--login-background-max-width":
+              config?.loginBackground?.maxWidth || "55%",
+          } as React.CSSProperties
+        }
       />
       <div className={styles.backgroundContainer}>
         <div className={styles.contentOverlay}>{children}</div>
