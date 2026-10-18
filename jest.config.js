@@ -11,6 +11,7 @@ module.exports = {
     "\\.(s?css)$": "identity-obj-proxy",
     "@openmrs/esm-framework": "@openmrs/esm-framework/mock",
     "^dexie$": require.resolve("dexie"),
+    "^lodash-es$": "lodash",
     "^lodash-es/(.*)$": "lodash/$1",
     "^uuid$": "<rootDir>/node_modules/uuid/dist/index.js",
     "react-i18next": "<rootDir>/__mocks__/react-i18next.js",

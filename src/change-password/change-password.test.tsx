@@ -34,7 +34,9 @@ describe("ChangePasswordModal", () => {
 
     await user.click(submitButton);
 
-    expect(screen.getByText(/old password is required/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/old password is required/i)
+    ).toBeInTheDocument();
     expect(screen.getByText(/new password is required/i)).toBeInTheDocument();
     expect(
       screen.getByText(/password confirmation is required/i)
@@ -44,7 +46,9 @@ describe("ChangePasswordModal", () => {
     await user.type(newPasswordInput, "N3wP@ssw0rd456!");
     await user.type(confirmPasswordInput, "N3wP@ssw0rd456");
 
-    expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/passwords do not match/i)
+    ).toBeInTheDocument();
 
     await user.clear(confirmPasswordInput);
     await user.type(confirmPasswordInput, "N3wP@ssw0rd456!");
