@@ -2,8 +2,10 @@
 @use "@carbon/styles/scss/spacing";
 @use "@openmrs/esm-styleguide/src/vars" as *;
 
-/* Hide the top navigation container on login pages */
-body :global(#omrs-top-nav-app-container) {
+/* Hide the top navigation container on login pages. Scoped to a body class
+   the login module adds on mount and removes on unmount, so the shell's top
+   nav is unaffected once the user logs in and navigates away. */
+:global(body.omrs-login-page #omrs-top-nav-app-container) {
   display: none !important;
   height: 0 !important;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./login/login.component";
 import RedirectLogout from "./redirect-logout/redirect-logout.component";
@@ -6,6 +6,11 @@ import ConfirmLocation from "./confirm-location/confirm.location.component";
 import "./root.scss";
 
 const Root: React.FC = () => {
+  useEffect(() => {
+    document.body.classList.add("omrs-login-page");
+    return () => document.body.classList.remove("omrs-login-page");
+  }, []);
+
   return (
     <BrowserRouter basename={window.spaBase}>
       <Routes>
